@@ -268,5 +268,5 @@ app.get("/users", (req, res) => {
 });
 
 app.listen(3008, () => {
-  console.log("Server is listening on port 3001");
+  console.log("Server is listening on port 3008");
 })
