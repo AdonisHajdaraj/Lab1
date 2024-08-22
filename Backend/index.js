@@ -1,12 +1,14 @@
 const express = require('express');
 const app = express();
 const mysql = require("mysql");
-const cors = require('cors');
+const cors = require("cors");
+
+
 
 const path = require('path');
 
-app.use(cors());
-app.use(express.json());
+
+
 
 
 
@@ -26,6 +28,9 @@ db.connect((err) => {
   }
   console.log('Connected to MySQL database');
 });
+
+app.use(express.json())
+app.use(cors())
 
 
 app.get("/dhomat", (req, res) => {
@@ -50,7 +55,7 @@ app.get("/orari", (req, res) => {
   });
 });
 
-app.get("/puntoret", (req, res) => {
+/*app.get("/puntoret", (req, res) => {
   db.query("SELECT * FROM puntoret", (err, result) => {
     if (err) {
       console.error('Error querying database:', err);
@@ -59,7 +64,7 @@ app.get("/puntoret", (req, res) => {
     }
     res.send(result);
   });
-});
+});*/
 
 app.get("/standarte", (req, res) => {
   db.query("SELECT * FROM standarte", (err, result) => {
@@ -152,7 +157,7 @@ app.post("/orari", (req, res) => {
   });
 });
 
-app.post("/puntoret", (req, res) => {
+/*app.post("/puntoret", (req, res) => {
   const sql = "INSERT INTO puntoret (name, sname, role) VALUES (?, ?, ?)";
   const values = [
     req.body.name,
@@ -167,7 +172,7 @@ app.post("/puntoret", (req, res) => {
     }
     res.json(result);
   });
-});
+});*/
 
 app.put("/dhomat/:id", (req, res) => {
   const { id } = req.params;
@@ -225,7 +230,7 @@ app.delete("/orari/:id", (req, res) => {
   });
 });
 
-app.delete("/puntoret/:id", (req, res) => {
+/*app.delete("/puntoret/:id", (req, res) => {
   const { id } = req.params;
   const sql = "DELETE FROM puntoret WHERE id = ?";
   db.query(sql, id, (err, result) => {
@@ -236,15 +241,14 @@ app.delete("/puntoret/:id", (req, res) => {
     }
     res.json(result);
   });
-});
+});*/
 
 app.post("/users", (req, res) => {
-  const sql = "INSERT INTO users (name, email, password, confirm) VALUES (?, ?, ?, ?)";
+  const sql = "INSERT INTO users (name, email, password) VALUES (?, ?, ?)";
   const values = [
     req.body.name,
     req.body.email,
-    req.body.password,
-    req.body.confirm
+    req.body.password,  
   ];
   db.query(sql, values, (err, result) => {
     if (err) {
@@ -254,6 +258,7 @@ app.post("/users", (req, res) => {
     return res.json(result);
   });
 });
+
 
 
 app.get("/users", (req, res) => {
@@ -266,6 +271,90 @@ app.get("/users", (req, res) => {
     res.send(result);
   });
 });
+
+
+app.post("/login", (req, res) => {
+  const { email, password, role } = req.body;
+
+  const sql = "SELECT * FROM users WHERE email = ? AND role = ?";
+  
+  db.query(sql, [email, role], (err, result) => {
+    if (err) {
+      console.error('Error querying database:', err);
+      return res.status(500).send("Internal Server Error");
+    }
+
+    if (result.length === 0) {
+      // No user found with that email and role
+      return res.status(400).json({ error: "User not found or role does not match" });
+    }
+
+    const user = result[0];
+
+    // Check if the password matches
+    if (user.password !== password) {
+      return res.status(400).json({ error: "Incorrect password" });
+    }
+
+    // If the role is admin and everything is correct, respond with success
+    if (user.role === 'admin') {
+      res.json({ message: "Admin login successful", user: { id: user.id, name: user.name, email: user.email } });
+    } else {
+      res.status(403).json({ error: "Access denied. Admins only." });
+    }
+  });
+});
+
+
+
+app.get("/puntoret", (req, res) => {
+  const q = "SELECT * FROM puntoret"
+  db.query(q,(err, data)=>{
+    if(err) return res.json(err)
+      return res.json(data)
+    })
+})
+
+app.post("/puntoret", (req, res)=> {
+  const q = "INSERT INTO puntoret (`name`, `sname`, `role`) VALUES (?)";
+  const values = [
+    req.body.name,
+    req.body.sname,
+    req.body.role,
+  ];
+  db.query(q, [values], (err, data)=>{
+    if(err) return res.json(err);
+      return res.json("Eshte krijuar me sukses");
+  });
+});
+
+
+app.delete("/puntoret/:id", (req, res)=>{
+  const puntoriId = req.params.id;
+  const q = "DELETE FROM puntoret WHERE id = ?";
+
+  db.query(q, [puntoriId], (err, data)=>{
+    if(err) return res.json(err);
+    return res.json("Eshte fshire me sukses")
+  });
+});
+
+
+app.put("/puntoret/:id", (req, res)=>{
+  const puntoriId = req.params.id;
+  const q = "UPDATE puntoret Set `name` = ?, `sname` = ?, `role` = ? WHERE id = ?";
+
+  const values=[
+    req.body.name,
+    req.body.sname,
+    req.body.role,
+  ]
+
+  db.query(q, [...values,puntoriId], (err, data)=>{
+    if(err) return res.json(err);
+    return res.json("Eshte ndryshuar me sukses")
+  })
+})
 
 app.listen(3008, () => {
   console.log("Server is listening on port 3008");

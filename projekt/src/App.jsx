@@ -8,13 +8,14 @@ import Dashboard from './components/Dashboard';
 import Dhomat from './components/Dhomat';
 import Rezervimet from './components/Rezervimet';
 import Help from './components/Help';
-import Rezervoo from './components/Rezervoo';
+import Rezervo from './components/Rezervo';
 import Login from './components/Login';
 import Signup from './components/Signup';
 import Orari  from './components/Orari'
 import Puntoret from './components/Puntoret';
 import  Menu from './components/Menu';
 import CreatePuntoret from './components/CreatePuntoret';
+import UpdatePuntoret from './components/UpdatePuntoret';
 
 
 
@@ -47,11 +48,14 @@ const App = () => {
           <Route path='/dhomat' element={<Dhomat />} />
           <Route path='/rezervimet' element={<Rezervimet />} />
           <Route path='/help' element={<Help />} />
-          <Route path='/rezervoo' element={<Rezervoo />} />
+          <Route path='/rezervo' element={<Rezervo />} />
           <Route path='/puntoret' element={<Puntoret />} />
+          <Route path='/create' element={<CreatePuntoret />}/>
+          <Route path='/update/:id' element={<UpdatePuntoret />}/>
           <Route path='/menu' element={<Menu />} />
           <Route path='/orari' element={<Orari />}/>
-        <Route path='/create' element={<CreatePuntoret />}/>
+          <Route path='/login' element={<Login />}/>
+          <Route path='/signup' element={<Signup />}/>
         </Routes>
        
       </div>

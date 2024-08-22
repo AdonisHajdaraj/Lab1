@@ -58,6 +58,13 @@ const Sidebar = () => {
             </Link>
         </div>
 
+        <div className="menu--list">
+        <Link to="/login"  className="item">
+                <BiHelpCircle className='icon' />
+                Login 
+            </Link>
+        </div>
+
       
     
     

@@ -2,31 +2,35 @@ import React from 'react'
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
-const CreatePuntoret = () => {
+const UpdatePuntoret = () => {
   const [input, setInput] = useState({
     name:"",
     sname:"",
     role:"",
   });
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const puntoriId = location.pathname.split("/")[2];
 
   const handleChange = (e) => {
     setInput(prev=>({...prev, [e.target.name]: e.target.value }))
   }
 
-  const handleClick = async e=>{
+  const handleClick = async (e) =>{
     e.preventDefault()
     try{
-      await axios.post("http://localhost:3008/puntoret", input)
+      await axios.put("http://localhost:3008/puntoret/" + puntoriId, input);
       navigate("/puntoret")
     }catch(err){
-      console.log(err)
+      console.log(err);
     }
   }
 
-  console.log(input)
+  
 
   return (
     <div className='container'>
@@ -34,7 +38,7 @@ const CreatePuntoret = () => {
         <div className='col-md-6'>
           <form>
             <div className='mb-3'>
-                <h1>Shto puntorin e ri</h1>
+                <h1>Ndrysho puntorin</h1>
                 <input type='text' placeholder='Emri' onChange={handleChange} name="name"/>
             </div>
             <div className='mb-3'>
@@ -44,7 +48,7 @@ const CreatePuntoret = () => {
                 <input type='text' placeholder='Roli' onChange={handleChange} name="role"/>
             </div>
             <div className='d-flex justify-content-center'>
-                <button className="btn btn-primary" onClick={handleClick}>Add</button>
+                <button className="btn btn-primary" onClick={handleClick}>Update</button>
             </div>
             </form>
         </div>
@@ -53,4 +57,4 @@ const CreatePuntoret = () => {
   )
 }
 
-export default CreatePuntoret
+export default UpdatePuntoret
