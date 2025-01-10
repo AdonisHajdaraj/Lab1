@@ -1,122 +1,79 @@
-import React, { useState } from 'react';
+import React from 'react'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import axios from 'axios'
 
 const Menu = () => {
-  const [selectedCategory, setSelectedCategory] = useState("mengjes");
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newFood, setNewFood] = useState("");
+    const [ushqimet, setUshqimet] = useState([])
 
-  const handleCategoryChange = (event) => {
-    setSelectedCategory(event.target.value);
-  };
+    useEffect(() => {
+        const fetchAllUshqimet = async () => {
+            try {
+                const res = await axios.get("http://localhost:3008/menu")
+                setUshqimet(res.data);
+            } catch (err) {
+                console.log(err)
+            }
+        }
+        fetchAllUshqimet()
+    }, []);
 
-  const handleAddFood = () => {
-    console.log(`Ushqimi i ri për ${selectedCategory}: ${newFood}`);
+    const handleDelete = async (id) => {
+        try {
+            await axios.delete("http://localhost:3008/menu/" + id)
+            window.location.reload()
+        } catch (err) {
+            console.log(err)
+        }
+    }
 
-    setNewFood("");
-   
-    setShowAddForm(false);
-  };
-
-  return (
-    <div className="container">
-      <h2>Menuja e Ushqimit</h2>
-      <select className="form-select mb-3" onChange={handleCategoryChange} value={selectedCategory}>
-        <option value="mengjes">Mengjes</option>
-        <option value="dreke">Dreka</option>
-        <option value="mbremje">Mbrëmje</option>
-      </select>
-      {selectedCategory === "mengjes" && (
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Ushqimi</th>
-              <th>Opsionet</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Omletë</td>
-              <td>
-                <button className="btn btn-primary">Edito</button>
-                <button className="btn btn-danger">Fshij</button>
-              </td>
-            </tr>
-            <tr>
-              <td>Spageti Carbonara</td>
-              <td>
-                <button className="btn btn-primary">Edito</button>
-                <button className="btn btn-danger">Fshij</button>
-              </td>
-            </tr>
-            {}
-          </tbody>
-        </table>
-      )}
-      {selectedCategory === "dreke" && (
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Ushqimi</th>
-              <th>Opsionet</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Peshk në tigan</td>
-              <td>
-                <button className="btn btn-primary">Edito</button>
-                <button className="btn btn-danger">Fshij</button>
-              </td>
-            </tr>
-            <tr>
-              <td>Salmon me perime të skuqura</td>
-              <td>
-                <button className="btn btn-primary">Edito</button>
-                <button className="btn btn-danger">Fshij</button>
-              </td>
-            </tr>
-            {}
-          </tbody>
-        </table>
-      )}
-      {selectedCategory === "mbremje" && (
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Ushqimi</th>
-              <th>Opsionet</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Pica</td>
-              <td>
-                <button className="btn btn-primary">Edito</button>
-                <button className="btn btn-danger">Fshij</button>
-              </td>
-            </tr>
-            <tr>
-              <td>Burger me qoftë dhe patate</td>
-              <td>
-                <button className="btn btn-primary">Edito</button>
-                <button className="btn btn-danger">Fshij</button>
-              </td>
-            </tr>
-            {}
-          </tbody>
-        </table>
-      )}
-      <div className="mt-3">
-        <button className="btn btn-primary" onClick={() => setShowAddForm(true)}>Shto Ushqim</button>
-        {showAddForm && (
-          <div className="mt-3">
-            <input type="text" className="form-control" value={newFood} onChange={(e) => setNewFood(e.target.value)} placeholder="Shkruaj ushqimin e ri" />
-            <button className="btn btn-success mt-2" onClick={handleAddFood}>Ruaj</button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
+    return (
+        <div className="container mt-5">
+            <h2 className="text-center mb-4 text-primary">Menuja e Ushqimit</h2>
+            <table className="table table-hover table-striped table-bordered shadow">
+                <thead className="bg-primary text-white">
+                    <tr>
+                        <th>Emri i Ushqimit</th>
+                        <th>Çmimi</th>
+                        <th>Veprimet</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {ushqimet.map(ushqimi => (
+                        <tr key={ushqimi.id}>
+                            <td className="align-middle">{ushqimi.name}</td>
+                            <td className="align-middle">{ushqimi.price} €</td>
+                            <td className="align-middle">
+                                <div className="d-flex gap-2 justify-content-center">
+                                    <button 
+                                        className="btn btn-danger btn-sm" onClick={() => handleDelete(ushqimi.id)}>
+                                        <i className="bi bi-trash"></i> Fshij
+                                    </button>
+                                    <Link to={`/editfood/${ushqimi.id}`} className="btn btn-warning btn-sm text-white">
+                                        <i className="bi bi-pencil-square"></i> Edit
+                                    </Link>
+                                </div>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+            <div className="d-flex justify-content-center mt-4">
+                <Link to="/addfood" className="btn btn-success shadow">
+                    <i className="bi bi-plus-lg"></i> Shto Ushqim
+                </Link>
+            </div>
+        </div>
+    )
+}
 export default Menu;
+
+
+
+
+
+
+
+
+
+

@@ -356,6 +356,53 @@ app.put("/puntoret/:id", (req, res)=>{
   })
 })
 
+//menu
+app.get("/menu", (req, res) => {
+  const q = "SELECT * FROM menu"
+  db.query(q,(err, data)=>{
+    if(err) return res.json(err)
+      return res.json(data)
+    })
+})
+
+app.post("/menu", (req, res)=> {
+  const q = "INSERT INTO menu (`name`, `price`) VALUES (?)";
+  const values = [
+    req.body.name,
+    req.body.price,
+  ];
+  db.query(q, [values], (err, data)=>{
+    if(err) return res.json(err);
+      return res.json("Eshte krijuar me sukses");
+  });
+});
+
+app.delete("/menu/:id", (req, res)=>{
+  const ushqimiId = req.params.id;
+  const q = "DELETE FROM menu WHERE id = ?";
+
+  db.query(q, [ushqimiId], (err, data)=>{
+    if(err) return res.json(err);
+    return res.json("Eshte fshire me sukses")
+  });
+});
+
+app.put("/menu/:id", (req, res)=>{
+  const ushqimiId = req.params.id;
+  const q = "UPDATE menu Set `name` = ?, `price` = ? WHERE id = ?";
+
+  const values=[
+    req.body.name,
+    req.body.price,
+  ]
+
+  db.query(q, [...values,ushqimiId], (err, data)=>{
+    if(err) return res.json(err);
+    return res.json("Eshte ndryshuar me sukses")
+  })
+})
+
+
 app.listen(3008, () => {
   console.log("Server is listening on port 3008");
 })

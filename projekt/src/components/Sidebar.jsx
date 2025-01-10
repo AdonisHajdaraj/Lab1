@@ -32,7 +32,13 @@ const Sidebar = () => {
             </Link>
         </div>
     
-  
+        <div className="menu--list">
+            <Link to="/menu"  className="item">
+                <BsFillPeopleFill className='icon' />
+               Menu
+            </Link>
+        
+        </div>
 
         
         <div className="menu--list">
