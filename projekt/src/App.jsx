@@ -18,6 +18,7 @@ import CreatePuntoret from './components/CreatePuntoret';
 import UpdatePuntoret from './components/UpdatePuntoret';
 import AddFood from './components/AddFood';
 import EditFood from './components/EditFood';
+import AddOrari from './components/AddOrari';
 
 
 const Nav = () => {
@@ -58,7 +59,8 @@ const App = () => {
           <Route path='/login' element={<Login />}/>
           <Route path='/signup' element={<Signup />}/>
           <Route path='/addfood' element={<AddFood/>}/>                      
-<Route path='/editfood/:id' element={<EditFood/>}/>
+          <Route path='/editfood/:id' element={<EditFood/>}/>
+          <Route path='/addorari' element={<AddOrari />}/>
         </Routes>
        
       </div>

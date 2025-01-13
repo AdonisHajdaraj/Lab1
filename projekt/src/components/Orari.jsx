@@ -1,181 +1,226 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import { Modal, Button } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 
 const Orari = () => {
-    const [data, setData] = useState([]);
-    const [showModal, setShowModal] = useState(false);
-    const [values, setValues] = useState({
+  const [puntoretOrari, setPuntoretOrari] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+  const [editValues, setEditValues] = useState({
+    name: '',
+    role: '',
+    h: '',
+    m: '',
+    me: '',
+    e: '',
+    p: '',
+  });
+
+  useEffect(() => {
+    const fetchAllPuntoretOrari = async () => {
+      try {
+        const res = await axios.get('http://localhost:3008/orari');
+        setPuntoretOrari(res.data);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchAllPuntoretOrari();
+  }, []);
+
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://localhost:3008/orari/${id}`);
+      setPuntoretOrari(puntoretOrari.filter((orari) => orari.id !== id));
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleEdit = (id) => {
+    const orari = puntoretOrari.find((item) => item.id === id);
+    setEditingId(id);
+    setEditValues(orari);
+  };
+
+  const handleSave = async () => {
+    try {
+      await axios.put(`http://localhost:3008/orari/${editingId}`, editValues);
+      setPuntoretOrari((prevData) =>
+        prevData.map((item) =>
+          item.id === editingId ? { ...item, ...editValues } : item
+        )
+      );
+      setEditingId(null);
+      setEditValues({
         name: '',
         role: '',
         h: '',
         m: '',
         me: '',
         e: '',
-        p: ''
+        p: '',
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleCancel = () => {
+    setEditingId(null);
+    setEditValues({
+      name: '',
+      role: '',
+      h: '',
+      m: '',
+      me: '',
+      e: '',
+      p: '',
     });
-    const [isEditing, setIsEditing] = useState(false);
-    const [editId, setEditId] = useState(null);
+  };
 
-    useEffect(() => {
-        fetchData();
-    }, []);
-
-    const fetchData = () => {
-        axios.get('http://localhost:3008/orari')
-            .then(res => setData(res.data))
-            .catch(err => console.log(err));
-    };
-
-    const handleAddOrEdit = () => {
-        if (isEditing) {
-            handleUpdate();
-        } else {
-            handleAdd();
-        }
-    };
-
-    const handleAdd = () => {
-        axios.post('http://localhost:3008/orari', values)
-            .then(res => {
-                setData([...data, res.data]);
-                setValues({ name: '', role: '', h: '', m: '', me: '', e: '', p: '' });
-                setShowModal(false);
-            })
-            .catch(err => console.log(err));
-    };
-
-    const handleEdit = (id) => {
-        const employeeToEdit = data.find(employee => employee.id === id);
-        if (employeeToEdit) {
-            setValues({
-                name: employeeToEdit.name,
-                role: employeeToEdit.role,
-                h: employeeToEdit.h,
-                m: employeeToEdit.m,
-                me: employeeToEdit.me,
-                e: employeeToEdit.e,
-                p: employeeToEdit.p
-            });
-            setEditId(id);
-            setIsEditing(true);
-            setShowModal(true);
-        }
-    };
-
-    const handleUpdate = () => {
-        axios.put(`http://localhost:3008/orari/${editId}`, values)
-            .then(res => {
-                const updatedData = data.map(employee => {
-                    if (employee.id === editId) {
-                        return res.data;
-                    }
-                    return employee;
-                });
-                setData(updatedData);
-                setEditId(null);
-                setValues({ name: '', role: '', h: '', m: '', me: '', e: '', p: '' });
-                setShowModal(false);
-            })
-            .catch(err => console.log(err));
-    };
-
-    const handleDelete = (id) => {
-        axios.delete(`http://localhost:3008/orari/${id}`)
-            .then(() => {
-                const updatedData = data.filter(employee => employee.id !== id);
-                setData(updatedData);
-            })
-            .catch(err => console.log(err));
-    };
-
-    const closeModal = () => {
-        setIsEditing(false);
-        setShowModal(false);
-        setValues({ name: '', role: '', h: '', m: '', me: '', e: '', p: '' });
-    };
-
-    return (
-        <div className="container mt-5">
-            <h2 className="text-center mb-4">Orari i Puntorve</h2>
-            <table className="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Emri</th>
-                        <th>Roli</th>
-                        <th>Hane</th>
-                        <th>Marte</th>
-                        <th>Merkure</th>
-                        <th>Ejte</th>
-                        <th>Premte</th>
-                        <th>Veprimet</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {data.map(employee => (
-                        <tr key={employee.id}>
-                            <td>{employee.name}</td>
-                            <td>{employee.role}</td>
-                            <td>{employee.h}</td>
-                            <td>{employee.m}</td>
-                            <td>{employee.me}</td>
-                            <td>{employee.e}</td>
-                            <td>{employee.p}</td>
-                            <td>
-                                <button className="btn btn-sm btn-primary" onClick={() => handleEdit(employee.id)}>Edit</button>
-                                <button className="btn btn-sm btn-danger ml-2" onClick={() => handleDelete(employee.id)}>Delete</button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-
-            <div className="text-center">
-                <button className="btn btn-success" onClick={() => setShowModal(true)}>Add </button>
+  return (
+    <div className="container mt-5">
+      <div className="text-center mb-4">
+        <h2 className="text-primary font-weight-bold">Orari i punetoreve</h2>
+      </div>
+      <div className="row">
+        {puntoretOrari.map((orari) => (
+          <div key={orari.id} className="col-12 col-md-6 col-lg-4 mb-4">
+            <div className="card shadow-sm border-0">
+              <div className="card-body">
+                {editingId === orari.id ? (
+                  <>
+                    <div className="mb-2">
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={editValues.name}
+                        onChange={(e) =>
+                          setEditValues({ ...editValues, name: e.target.value })
+                        }
+                        placeholder="Name"
+                      />
+                    </div>
+                    <div className="mb-2">
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={editValues.role}
+                        onChange={(e) =>
+                          setEditValues({ ...editValues, role: e.target.value })
+                        }
+                        placeholder="Role"
+                      />
+                    </div>
+                    <div className="mb-2">
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={editValues.h}
+                        onChange={(e) =>
+                          setEditValues({ ...editValues, h: e.target.value })
+                        }
+                        placeholder="Monday"
+                      />
+                    </div>
+                    <div className="mb-2">
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={editValues.m}
+                        onChange={(e) =>
+                          setEditValues({ ...editValues, m: e.target.value })
+                        }
+                        placeholder="Tuesday"
+                      />
+                    </div>
+                    <div className="mb-2">
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={editValues.me}
+                        onChange={(e) =>
+                          setEditValues({ ...editValues, me: e.target.value })
+                        }
+                        placeholder="Wednesday"
+                      />
+                    </div>
+                    <div className="mb-2">
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={editValues.e}
+                        onChange={(e) =>
+                          setEditValues({ ...editValues, e: e.target.value })
+                        }
+                        placeholder="Thursday"
+                      />
+                    </div>
+                    <div className="mb-2">
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={editValues.p}
+                        onChange={(e) =>
+                          setEditValues({ ...editValues, p: e.target.value })
+                        }
+                        placeholder="Friday"
+                      />
+                    </div>
+                    <div className="d-flex justify-content-between">
+                      <button
+                        className="btn btn-success"
+                        onClick={handleSave}
+                      >
+                        Save
+                      </button>
+                      <button
+                        className="btn btn-secondary"
+                        onClick={handleCancel}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <h5 className="card-title">{orari.name}</h5>
+                    <p className="card-text">Role: {orari.role}</p>
+                    <ul className="list-unstyled">
+                      <li><strong>Hene:</strong> {orari.h}</li>
+                      <li><strong>Marte:</strong> {orari.m}</li>
+                      <li><strong>Merkure:</strong> {orari.me}</li>
+                      <li><strong>Enjte:</strong> {orari.e}</li>
+                      <li><strong>Premte:</strong> {orari.p}</li>
+                    </ul>
+                    <div className="d-flex justify-content-between">
+                      <button
+                        className="btn btn-outline-primary btn-sm"
+                        onClick={() => handleEdit(orari.id)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="btn btn-outline-danger btn-sm"
+                        onClick={() => handleDelete(orari.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
-
-            <Modal show={showModal} onHide={closeModal}>
-                <Modal.Header closeButton>
-                    <Modal.Title>{isEditing ? 'Edit Employee' : 'Add Employee'}</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <div className="form-group">
-                        <label htmlFor="name">Emri:</label>
-                        <input type="text" className="form-control" id="name" value={values.name} onChange={(e) => setValues({ ...values, name: e.target.value })} />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="role">Roli:</label>
-                        <input type="text" className="form-control" id="role" value={values.role} onChange={(e) => setValues({ ...values, role: e.target.value })} />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="hane">Hane:</label>
-                        <input type="text" className="form-control" id="hane" value={values.h} onChange={(e) => setValues({ ...values, h: e.target.value })} />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="marte">Marte:</label>
-                        <input type="text" className="form-control" id="marte" value={values.m} onChange={(e) => setValues({ ...values, m: e.target.value })} />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="merkure">Merkure:</label>
-                        <input type="text" className="form-control" id="merkure" value={values.me} onChange={(e) => setValues({ ...values, me: e.target.value })} />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="ejte">Ejte:</label>
-                        <input type="text" className="form-control" id="ejte" value={values.e} onChange={(e) => setValues({ ...values, e: e.target.value })} />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="premte">Premte:</label>
-                        <input type="text" className="form-control" id="premte" value={values.p} onChange={(e) => setValues({ ...values, p: e.target.value })} />
-                    </div>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={closeModal}>Cancel</Button>
-                    <Button variant="primary" onClick={handleAddOrEdit}>{isEditing ? 'Save Changes' : 'Save'}</Button>
-                </Modal.Footer>
-            </Modal>
-        </div>
-    );
-}
+          </div>
+        ))}
+      </div>
+      <div className="text-center mt-4">
+        <Link to="/addorari" className="btn btn-success shadow">
+          <i className="bi bi-plus-circle"></i> Shto
+        </Link>
+      </div>
+    </div>
+  );
+};
 
 export default Orari;

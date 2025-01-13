@@ -44,7 +44,7 @@ app.get("/dhomat", (req, res) => {
   });
 });
 
-app.get("/orari", (req, res) => {
+/*app.get("/orari", (req, res) => {
   db.query("SELECT * FROM orari", (err, result) => {
     if (err) {
       console.error('Error querying database:', err);
@@ -53,7 +53,7 @@ app.get("/orari", (req, res) => {
     }
     res.send(result);
   });
-});
+});*/
 
 /*app.get("/puntoret", (req, res) => {
   db.query("SELECT * FROM puntoret", (err, result) => {
@@ -136,7 +136,7 @@ app.post("/dhomat", (req, res) => {
   });
 });
 
-app.post("/orari", (req, res) => {
+/*app.post("/orari", (req, res) => {
   const sql = "INSERT INTO orari (name, role, h , m , me , e , p) VALUES (?, ?, ? , ? , ? , ? , ?)";
   const values = [
     req.body.name,
@@ -155,7 +155,7 @@ app.post("/orari", (req, res) => {
     }
     res.json(result);
   });
-});
+});*/
 
 /*app.post("/puntoret", (req, res) => {
   const sql = "INSERT INTO puntoret (name, sname, role) VALUES (?, ?, ?)";
@@ -189,7 +189,7 @@ app.put("/dhomat/:id", (req, res) => {
   });
 });
 
-app.put("/orari/:id", (req, res) => {
+/*app.put("/orari/:id", (req, res) => {
   const { id } = req.params;
   const { name, role, h , m , me ,e , p  } = req.body;
   const sql = "UPDATE orari SET name = ?, role = ?, h = ?, m = ? , me = ? , e = ?, p = ? WHERE id = ?";
@@ -202,7 +202,7 @@ app.put("/orari/:id", (req, res) => {
     }
     res.json(result);
   });
-});
+});*/
 
 app.delete("/dhomat/:id", (req, res) => {
   const { id } = req.params;
@@ -217,7 +217,7 @@ app.delete("/dhomat/:id", (req, res) => {
   });
 });
 
-app.delete("/orari/:id", (req, res) => {
+/*app.delete("/orari/:id", (req, res) => {
   const { id } = req.params;
   const sql = "DELETE FROM orari WHERE id = ?";
   db.query(sql, id, (err, result) => {
@@ -228,7 +228,7 @@ app.delete("/orari/:id", (req, res) => {
     }
     res.json(result);
   });
-});
+});*/
 
 /*app.delete("/puntoret/:id", (req, res) => {
   const { id } = req.params;
@@ -397,6 +397,63 @@ app.put("/menu/:id", (req, res)=>{
   ]
 
   db.query(q, [...values,ushqimiId], (err, data)=>{
+    if(err) return res.json(err);
+    return res.json("Eshte ndryshuar me sukses")
+  })
+})
+
+
+//orari
+app.get("/orari", (req, res) => {
+  const q = "SELECT * FROM orari"
+  db.query(q,(err, data)=>{
+    if(err) return res.json(err)
+      return res.json(data)
+    })
+})
+
+app.post("/orari", (req, res)=> {
+  const q = "INSERT INTO orari(`name`, `role`, `h`, `m`, `me`, `e`, `p`) VALUES (?)";
+  const values = [
+    req.body.name,
+    req.body.role,
+    req.body.h,
+    req.body.m,
+    req.body.me,
+    req.body.e,
+    req.body.p,
+  ];
+  db.query(q, [values], (err, data)=>{
+    if(err) return res.json(err);
+      return res.json("Eshte krijuar me sukses");
+  });
+});
+
+app.delete("/orari/:id", (req, res)=>{
+  const orariId = req.params.id;
+  const q = "DELETE FROM orari WHERE id = ?";
+
+  db.query(q, [orariId], (err, data)=>{
+    if(err) return res.json(err);
+    return res.json("Eshte fshire me sukses")
+  });
+});
+
+app.put("/orari/:id", (req, res)=>{
+  const orariId = req.params.id;
+  const q = "UPDATE orari Set `name` = ?, `role` = ?, `h` = ?, `m` = ?, `me` = ?, `e` = ?, `p` = ? WHERE id = ?";
+
+  const values=[
+    req.body.name,
+    req.body.role,
+    req.body.h,
+    req.body.m,
+    req.body.me,
+    req.body.e,
+    req.body.p,
+  ]
+
+  db.query(q, [...values,orariId], (err, data)=>{
     if(err) return res.json(err);
     return res.json("Eshte ndryshuar me sukses")
   })
