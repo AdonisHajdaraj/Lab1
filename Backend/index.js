@@ -2,13 +2,13 @@ const express = require('express');
 const app = express();
 const mysql = require("mysql");
 const cors = require("cors");
-
+const jwt = require('jsonwebtoken');
 
 
 const path = require('path');
 
 
-
+const secretKey = 'my_secret_key';
 
 
 
@@ -242,7 +242,7 @@ app.delete("/dhomat/:id", (req, res) => {
     res.json(result);
   });
 });*/
-
+/*
 app.post("/users", (req, res) => {
   const sql = "INSERT INTO users (name, email, password) VALUES (?, ?, ?)";
   const values = [
@@ -257,10 +257,10 @@ app.post("/users", (req, res) => {
     }
     return res.json(result);
   });
-});
+});*/
 
 
-
+/*
 app.get("/users", (req, res) => {
   db.query("SELECT * FROM users", (err, result) => {
     if (err) {
@@ -305,7 +305,7 @@ app.post("/login", (req, res) => {
   });
 });
 
-
+*/
 
 app.get("/puntoret", (req, res) => {
   const q = "SELECT * FROM puntoret"
@@ -458,8 +458,71 @@ app.put("/orari/:id", (req, res)=>{
     return res.json("Eshte ndryshuar me sukses")
   })
 })
+app.post('/v1/signin', (req, res) => {
+  const { email, password } = req.body;
+
+
+  if (!email || !password) {
+    return res.status(400).json({ message: "Email and password are required" });
+  }
+
+  const sql = "SELECT role FROM login WHERE email = ? AND password = ?";
+  db.query(sql, [email, password], (err, data) => {
+    if (err) {
+      console.error('Error querying database:', err);
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
+
+    if (data.length > 0) {
+      const userRole = data[0].role;
+      const payload = { email, role: userRole };
+      const token = jwt.sign(payload, secretKey, { expiresIn: '1h' });
+      return res.json({ token, role: userRole, message: "Success" });
+    } else {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+  });
+});
+
+
+
+
+app.post('/v1/register', (req, res) => {
+  const { name, email, password } = req.body;
+
+
+  if (!name || !email || !password) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  const sql = "INSERT INTO login (name, email, password) VALUES (?, ?, ?)";
+  const values = [name, email, password];
+
+  db.query(sql, values, (err, data) => {
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ message: "Error inserting data into the database" });
+    }
+
+    const payload = { name, email };
+    const token = jwt.sign(payload, secretKey, { expiresIn: '1h' });
+
+    return res.status(200).json({
+      message: "User registered successfully",
+      token,
+    });
+  });
+});
 
 
 app.listen(3008, () => {
   console.log("Server is listening on port 3008");
 })
+
+
+
+
+
+
+
+

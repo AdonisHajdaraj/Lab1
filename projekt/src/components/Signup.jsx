@@ -1,44 +1,68 @@
 import React, { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Link } from 'react-router-dom';
 
-function Signup() {
-    
+const Signup = () => {
+  const [values, setValues] = useState({ name: '', email: '', password: '' });
+  const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
 
-    return (
-        <div className="container mt-5">
-            <div className="row justify-content-center">
-                <div className="col-md-6">
-                    <div className="card shadow">
-                        <div className="card-body p-5">
-                            <h5 className="card-title text-center mb-4">Sign Up</h5>
-                            <form>
-                                <div className="mb-3">
-                                    <label htmlFor="email" className="form-label">Email</label>
-                                    <input type="email" className="form-control" id="email" />
-                                </div>
-                                <div className="mb-3">
-                                    <label htmlFor="username" className="form-label">Username</label>
-                                    <input type="name" className="form-control" id="username" />
-                                </div>
-                                <div className="mb-3">
-                                    <label htmlFor="password" className="form-label">Password</label>
-                                    <input type="password" className="form-control" id="password" />
-                                </div>
-                                <div className="d-grid mb-3">
-                                    <button type="submit" className="btn btn-primary btn-block">Sign Up</button>
-                                </div>
-                            </form>
-                            <div className="text-center">
-                                <span>Already have an account? </span>
-                                <Link to="/login" className="link-primary">Log in</Link>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
+  const validate = (values) => {
+    const errors = {};
+    if (!values.name) errors.name = "Emri është i detyrueshëm.";
+    if (!values.email) {
+      errors.email = "Email është i detyrueshëm.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
+      errors.email = "Email nuk është valid.";
+    }
+    if (!values.password) errors.password = "Fjalëkalimi është i detyrueshëm.";
+    else if (values.password.length < 6) errors.password = "Fjalëkalimi duhet të ketë të paktën 6 karaktere.";
+    return errors;
+  };
+
+  const handleInputChange = (e) => setValues({ ...values, [e.target.name]: e.target.value });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const validationErrors = validate(values);
+    setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length === 0) {
+      axios.post('http://localhost:3008/v1/register', values)
+        .then(res => {
+          if (res.data.token) {
+            localStorage.setItem('jwtToken', res.data.token);
+            navigate('/login');
+          }
+        })
+        .catch(console.error);
+    }
+  };
+
+  return (
+    <div className="container mt-5">
+      <h2>Regjistrohu</h2>
+      <form onSubmit={handleSubmit}>
+        {['name', 'email', 'password'].map(field => (
+          <div className="mb-3" key={field}>
+            <label htmlFor={field} className="form-label">{field === 'name' ? 'Emri' : field === 'email' ? 'Email' : 'Fjalëkalimi'}</label>
+            <input
+              type={field === 'password' ? 'password' : 'text'}
+              className="form-control"
+              id={field}
+              name={field}
+              value={values[field]}
+              onChange={handleInputChange}
+              required
+            />
+            {errors[field] && <div className="text-danger">{errors[field]}</div>}
+          </div>
+        ))}
+        <button type="submit" className="btn btn-primary">Regjistrohu</button>
+      </form>
+    </div>
+  );
+};
 
 export default Signup;
