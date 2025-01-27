@@ -26,7 +26,7 @@ const USidebar = () => {
             </Link>
         </div>
         <div className="menu--list">
-        <Link to="/user-rezervoo"  className="item">
+        <Link to="/user-rezervo"  className="item">
                 <BiBed className='icon' />
                 Rezervo
             </Link>

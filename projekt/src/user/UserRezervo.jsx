@@ -1,60 +1,62 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
-import { Dropdown, DropdownButton, Container, Table, Button, Spinner, Alert } from 'react-bootstrap';
-import Sidebar from '../user/UserSidebar';
+import { Dropdown, DropdownButton, Table, Button, Alert, Spinner, Modal, Form } from 'react-bootstrap';
+import Sidebar from '../user/UserSidebar'; // Assuming Sidebar is in this path
 
 function UApp() {
-  const [selectedTable, setSelectedTable] = useState(null);
-  const [data, setData] = useState([]);
+  const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [reservationDates, setReservationDates] = useState({ from_date: '', to_date: '' });
 
-  const fetchData = (url) => {
+  // Fetch rooms when a room type is selected
+  const fetchRooms = (type) => {
     setLoading(true);
-    axios.get(url)
-      .then(res => {
-        setData(res.data);
+    axios
+      .get(`http://localhost:3008/rooms/${type}`)
+      .then((res) => {
+        setRooms(res.data); // Set the rooms data
         setLoading(false);
-        setError(null);
       })
-      .catch(err => {
+      .catch((err) => {
         setLoading(false);
-        setError(err.message);
+        setError('Error fetching rooms');
       });
   };
 
-  const reserveRoom = (roomType) => {
-    alert(`Dhoma ${roomType} u rezervua!`);
+  // Open modal for reservation
+  const handleReserveClick = (room) => {
+    setSelectedRoom(room);
+    setShowModal(true);
   };
 
-  const renderTable = () => {
-    return (
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>Tipi i Dhomes</th>
-            <th>Numri i Dhomes</th>
-            <th>Qmimi i Dhomes</th>
-            <th>Rezervo</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((room, index) => (
-            <tr key={index}>
-              <td>{room.name}</td>
-              <td>{room.nr}</td>
-              <td>{room.qmimi}</td>
-              <td><Button variant="primary" onClick={() => reserveRoom(room.tipi)}>Rezervo</Button></td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-    );
-  };
+  // Handle form submission for reserving a room
+  const handleReserve = () => {
+    if (!reservationDates.from_date || !reservationDates.to_date) {
+      alert('Please select both dates.');
+      return;
+    }
 
-  const showTable = (url) => {
-    fetchData(url);
-    setSelectedTable(null);
+    const reservationData = {
+      roomId: selectedRoom.id,
+      from_date: reservationDates.from_date,
+      to_date: reservationDates.to_date,
+    };
+
+    // Call backend to reserve the room
+    axios
+      .post(`http://localhost:3008/reserve`, reservationData)
+      .then(() => {
+        alert('Dhoma u rezervua me sukses!');
+        setShowModal(false);
+        fetchRooms(selectedRoom.type); // Refresh rooms after reservation
+      })
+      .catch((err) => {
+        console.error(err);
+        alert('Error reserving the room.');
+      });
   };
 
   return (
@@ -62,25 +64,96 @@ function UApp() {
       <div className="row">
         {/* Sidebar */}
         <div className="col-md-3">
-          <Sidebar />
+          <Sidebar /> {/* Include the sidebar here */}
         </div>
 
         {/* Main Content */}
         <div className="col-md-9">
-          <Container className="mt-3">
-            <DropdownButton id="dropdown-basic-button" title="Llojet e Dhomave">
-              <Dropdown.Item onClick={() => showTable('http://localhost:3008/standarte')}>Dhoma Standarte</Dropdown.Item>
-              <Dropdown.Item onClick={() => showTable('http://localhost:3008/vip')}>Dhoma VIP</Dropdown.Item>
-              <Dropdown.Item onClick={() => showTable('http://localhost:3008/familjare')}>Dhoma Familjare</Dropdown.Item>
-              <Dropdown.Item onClick={() => showTable('http://localhost:3008/ekslusive')}>Dhoma Ekslusive</Dropdown.Item>
-              <Dropdown.Item onClick={() => showTable('http://localhost:3008/suite')}>Dhoma Suite</Dropdown.Item>
+          <div className="container mt-5">
+            <div className="text-center mb-4">
+              <h1 className="fw-bold text-primary">Selekto nje dhome</h1>
+            </div>
+
+            {/* Dropdown Button to select Room Type */}
+            <DropdownButton id="dropdown-basic-button" title="Select Room Type">
+              <Dropdown.Item onClick={() => fetchRooms('VIP')}>VIP</Dropdown.Item>
+              <Dropdown.Item onClick={() => fetchRooms('Standarte')}>Standarte</Dropdown.Item>
+              <Dropdown.Item onClick={() => fetchRooms('Familjare')}>Familjare</Dropdown.Item>
+              <Dropdown.Item onClick={() => fetchRooms('Eksklusive')}>Eksklusive</Dropdown.Item>
+              <Dropdown.Item onClick={() => fetchRooms('Suite')}>Suite</Dropdown.Item>
             </DropdownButton>
+
+            {/* Loading Spinner and Error Alert */}
             {loading && <Spinner animation="border" />}
             {error && <Alert variant="danger">{error}</Alert>}
-            {selectedTable || renderTable()}
-          </Container>
+
+            {/* Table to display rooms */}
+            {rooms.length > 0 && (
+              <Table striped bordered hover className="mt-4">
+                <thead>
+                  <tr>
+                    <th>Numri i dhomes</th>
+                    <th>Qmimi</th>
+                    <th>Statusi i rezervimit</th>
+                    <th>Veprimet</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rooms.map((room) => (
+                    <tr key={room.id}>
+                      <td>{room.nr}</td>
+                      <td>{room.qmimi}</td>
+                      <td>{room.reservation_status === '0' ? 'Available' : 'Reserved'}</td>
+                      <td>
+                        {room.reservation_status === '0' ? (
+                          <Button onClick={() => handleReserveClick(room)}>Reservo</Button>
+                        ) : (
+                          <Button disabled>Reserved</Button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Modal for reserving a room */}
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Reserve Room</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>From Date</Form.Label>
+              <Form.Control
+                type="date"
+                value={reservationDates.from_date}
+                onChange={(e) => setReservationDates({ ...reservationDates, from_date: e.target.value })}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>To Date</Form.Label>
+              <Form.Control
+                type="date"
+                value={reservationDates.to_date}
+                onChange={(e) => setReservationDates({ ...reservationDates, to_date: e.target.value })}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleReserve}>
+            Reserve
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }

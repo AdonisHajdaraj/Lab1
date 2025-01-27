@@ -358,7 +358,7 @@ app.put("/puntoret/:id", (req, res)=>{
 
 //menu
 app.get("/menu", (req, res) => {
-  const q = "SELECT * FROM menu"
+  const q = "SELECT * FROM menu1"
   db.query(q,(err, data)=>{
     if(err) return res.json(err)
       return res.json(data)
@@ -366,7 +366,7 @@ app.get("/menu", (req, res) => {
 })
 
 app.post("/menu", (req, res)=> {
-  const q = "INSERT INTO menu (`name`, `price`) VALUES (?)";
+  const q = "INSERT INTO menu1 (`name`, `price`) VALUES (?)";
   const values = [
     req.body.name,
     req.body.price,
@@ -379,7 +379,7 @@ app.post("/menu", (req, res)=> {
 
 app.delete("/menu/:id", (req, res)=>{
   const ushqimiId = req.params.id;
-  const q = "DELETE FROM menu WHERE id = ?";
+  const q = "DELETE FROM menu1 WHERE id = ?";
 
   db.query(q, [ushqimiId], (err, data)=>{
     if(err) return res.json(err);
@@ -389,7 +389,7 @@ app.delete("/menu/:id", (req, res)=>{
 
 app.put("/menu/:id", (req, res)=>{
   const ushqimiId = req.params.id;
-  const q = "UPDATE menu Set `name` = ?, `price` = ? WHERE id = ?";
+  const q = "UPDATE menu1 Set `name` = ?, `price` = ? WHERE id = ?";
 
   const values=[
     req.body.name,
@@ -513,6 +513,88 @@ app.post('/v1/register', (req, res) => {
     });
   });
 });
+
+
+
+
+
+// Fetch rooms by type
+/*app.get('/:roomType', (req, res) => {
+  const roomType = req.params.roomType;
+  const query = 'SELECT * FROM rooms WHERE type = ?';
+  db.query(query, [roomType], (err, results) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Error fetching room data');
+    } else {
+      res.json(results);
+    }
+  });
+});
+
+// Reserve a room
+app.post('/reserve', (req, res) => {
+  console.log("Request body:", req.body);
+  const { tipi } = req.body;
+  const query = 'UPDATE rooms SET reserved = 1 WHERE type = ? AND reserved = 0 LIMIT 1';
+  db.query(query, [tipi], (err, results) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Error reserving the room');
+    } else if (results.affectedRows === 0) {
+      res.status(400).send('No available rooms of this type');
+    } else {
+      res.send('Room reserved successfully');
+    }
+  });
+});
+*/
+
+app.get('/rooms/:type', (req, res) => {
+  const { type } = req.params;  // Room type from the dropdown
+
+  const query = 'SELECT * FROM reservations WHERE name = ?';
+
+  db.query(query, [type], (err, rooms) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Error fetching rooms');
+    }
+    
+    res.json(rooms);  // Return the rooms for the selected type
+  });
+});
+
+
+app.post('/reserve', (req, res) => {
+  const { roomId, from_date, to_date } = req.body;
+
+  if (!roomId || !from_date || !to_date) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  const query = `
+    UPDATE reservations
+    SET reservation_status = '1', from_date = ?, to_date = ?
+    WHERE id = ?
+  `;
+
+  db.query(query, [from_date, to_date, roomId], (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Room not found or already reserved' });
+    }
+
+    res.json({ message: 'Room reserved successfully!' });//0 AVAILABLE 1 RESERVED
+  });
+});
+
+
+
 
 
 app.listen(3008, () => {
