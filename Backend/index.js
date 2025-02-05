@@ -594,6 +594,49 @@ app.post('/reserve', (req, res) => {
 });
 
 
+//admin rezervation side
+app.get('/admin/reservations', (req, res) => {
+  const query = 'SELECT * FROM reservations';
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Error fetching reservations' });
+    }
+
+    res.json(results); // Send all reservations to the admin
+  });
+});
+
+
+app.post('/cancel', (req, res) => {
+  const { roomId } = req.body;
+
+  if (!roomId) {
+    return res.status(400).json({ message: 'Room ID is required' });
+  }
+
+  const sql = `
+    UPDATE reservations 
+    SET reservation_status = '0', from_date = NULL, to_date = NULL 
+    WHERE id = ? AND reservation_status = '1'
+  `;
+
+  db.query(sql, [roomId], (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'Failed to cancel the reservation' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Reservation not found or already available' });
+    }
+
+    res.status(200).json({ message: 'Reservation canceled successfully' });
+  });
+});
+
+
 
 
 

@@ -1,89 +1,113 @@
-import React, { useState } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import { BsPencilSquare, BsTrash } from 'react-icons/bs';
 
-function Rezervimet() {
-  const [data, setData] = useState([
-    { id: 1, name: 'John Doe', email: 'john@example.com', room: 'Room 101', price: '100', date: '2024-04-07' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', room: 'Room 102', price: '120', date: '2024-04-08' }
-  ]);
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Table, Button, Alert, Spinner } from 'react-bootstrap';
+import Sidebar from '../admin/Sidebar';
 
-  const [editRow, setEditRow] = useState(null);
-  const [editedName, setEditedName] = useState('');
-  const [editedEmail, setEditedEmail] = useState('');
-  const [editedRoom, setEditedRoom] = useState('');
-  const [editedPrice, setEditedPrice] = useState('');
-  const [editedDate, setEditedDate] = useState('');
+function AdminReservations() {
+  const [reservations, setReservations] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleAddRow = () => {
-    setData([...data, { id: data.length + 1, name: 'New Name', email: 'New Email', room: 'New Room', price: 'New Price', date: 'New Date' }]);
+  // Fetch all reservations from the backend
+  const fetchReservations = () => {
+    setLoading(true);
+    axios
+      .get('http://localhost:3008/admin/reservations')
+      .then((res) => {
+        setReservations(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setLoading(false);
+        setError('Error fetching reservations');
+      });
   };
 
-  const handleDeleteRow = (id) => {
-    setData(data.filter(row => row.id !== id));
+  // Cancel a reservation
+  const handleCancel = (roomId) => {
+    if (window.confirm('Are you sure you want to cancel this reservation?')) {
+      axios
+        .post('http://localhost:3008/cancel', { roomId })
+        .then((res) => {
+          alert(res.data.message); // Show success message
+          fetchReservations(); // Refresh the reservations list
+        })
+        .catch((err) => {
+          console.error(err);
+          alert('Error canceling the reservation.');
+        });
+    }
   };
 
-  const handleEdit = (id, name, email, room, price, date) => {
-    setEditRow(id);
-    setEditedName(name);
-    setEditedEmail(email);
-    setEditedRoom(room);
-    setEditedPrice(price);
-    setEditedDate(date);
-  };
-
-  const handleSaveEdit = () => {
-    setData(data.map(row => {
-      if (row.id === editRow) {
-        return { ...row, name: editedName, email: editedEmail, room: editedRoom, price: editedPrice, date: editedDate };
-      }
-      return row;
-    }));
-    setEditRow(null);
-  };
+  useEffect(() => {
+    fetchReservations(); // Load reservations on component mount
+  }, []);
 
   return (
-    <div className="container mt-5">
-      <h1 className="mb-4 text-center">Rezervimet e bera</h1>
-      <table className="table table-bordered table-hover">
-        <thead className="thead-dark">
-          <tr>
-            <th className="text-center">Name</th>
-            <th className="text-center">Email</th>
-            <th className="text-center">Room</th>
-            <th className="text-center">Price</th>
-            <th className="text-center">Date</th>
-            <th className="text-center">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map(row => (
-            <tr key={row.id}>
-              <td className="align-middle">{editRow === row.id ? <input type="text" className="form-control" value={editedName} onChange={(e) => setEditedName(e.target.value)} /> : row.name}</td>
-              <td className="align-middle">{editRow === row.id ? <input type="text" className="form-control" value={editedEmail} onChange={(e) => setEditedEmail(e.target.value)} /> : row.email}</td>
-              <td className="align-middle">{editRow === row.id ? <input type="text" className="form-control" value={editedRoom} onChange={(e) => setEditedRoom(e.target.value)} /> : row.room}</td>
-              <td className="align-middle">{editRow === row.id ? <input type="text" className="form-control" value={editedPrice} onChange={(e) => setEditedPrice(e.target.value)} /> : row.price}</td>
-              <td className="align-middle">{editRow === row.id ? <input type="text" className="form-control" value={editedDate} onChange={(e) => setEditedDate(e.target.value)} /> : row.date}</td>
-              <td className="align-middle text-center">
-                {editRow === row.id ? (
-                  <>
-                    <button className="btn btn-success" onClick={handleSaveEdit}><BsPencilSquare /> Save</button>
-                    <button className="btn btn-secondary ml-2" onClick={() => setEditRow(null)}><BsTrash /> Cancel</button>
-                  </>
-                ) : (
-                  <>
-                    <button className="btn btn-primary" onClick={() => handleEdit(row.id, row.name, row.email, row.room, row.price, row.date)}><BsPencilSquare /> Edit</button>
-                    <button className="btn btn-danger ml-2" onClick={() => handleDeleteRow(row.id)}><BsTrash /> Delete</button>
-                  </>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <button className="btn btn-primary" onClick={handleAddRow}>Add Room</button>
+    <div className="container-fluid">
+      <div className="row">
+        {/* Sidebar */}
+        <div className="col-md-3">
+          <Sidebar /> 
+        </div>
+
+        
+        <div className="col-md-9">
+          <div className="container mt-5">
+            <div className="text-center mb-4">
+              <h1 className="fw-bold text-primary">Menaxhmenti i rezervimeve</h1>
+            </div>
+
+            {/* Loading Spinner and Error Alert */}
+            {loading && <Spinner animation="border" />}
+            {error && <Alert variant="danger">{error}</Alert>}
+
+            
+            {reservations.length > 0 ? (
+              <Table striped bordered hover className="mt-4">
+                <thead>
+                  <tr>
+                    <th>Emri i dhomes</th>
+                    <th>Numri i dhomes</th>
+                    <th>Qmimi</th>
+                    <th>Status</th>
+                    <th>From Date</th>
+                    <th>To Date</th>
+                    <th>Veprimet</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {reservations.map((reservation) => (
+                    <tr key={reservation.id}>
+                      <td>{reservation.name}</td>
+                      <td>{reservation.nr}</td>
+                      <td>{reservation.qmimi}</td>
+                      <td>{reservation.reservation_status === '0' ? 'Available' : 'Reserved'}</td>
+                      <td>{reservation.from_date || 'N/A'}</td>
+                      <td>{reservation.to_date || 'N/A'}</td>
+                      <td>
+                        {reservation.reservation_status === '1' && (
+                          <Button
+                            variant="danger"
+                            onClick={() => handleCancel(reservation.id)}
+                          >
+                            Cancel
+                          </Button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            ) : (
+              <Alert variant="info">No reservations found.</Alert>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
-export default Rezervimet;
+export default AdminReservations;
