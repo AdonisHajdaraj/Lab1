@@ -13,7 +13,7 @@ function Users() {
     const fetchUsers = async () => {
         setLoading(true); 
         try {
-            const response = await axios.get('http://localhost:3001/v2/login');
+            const response = await axios.get('http://localhost:3008/v2/login');
             setUsers(response.data);
         } catch (error) {
             setMessage('Error fetching users.');
@@ -34,10 +34,10 @@ function Users() {
         try {
             let response;
             if (isEdit) {
-                response = await axios.put(`http://localhost:3001/v1/login/${formData.id}`, formData);
+                response = await axios.put(`http://localhost:3008/v1/login/${formData.id}`, formData);
                 setMessage(`User updated: ${response.data.message}`);
             } else {
-                response = await axios.post('http://localhost:3001/v1/login', formData);
+                response = await axios.post('http://localhost:3008/v1/login', formData);
                 setMessage(`User added: ${response.data.message}`);
             }
 
@@ -56,7 +56,7 @@ function Users() {
         if (window.confirm("Are you sure you want to delete this user?")) {
             setLoading(true); 
             try {
-                const response = await axios.delete(`http://localhost:3001/v1/login/${id}`);
+                const response = await axios.delete(`http://localhost:3008/v1/login/${id}`);
                 setMessage(`User deleted: ${response.data.message}`);
                 fetchUsers(); 
             } catch (error) {
@@ -74,9 +74,17 @@ function Users() {
     };
 
     return (
+        <div className="container-fluid">
+        <div className="row">
+          {/* Sidebar */}
+          <div className="col-md-3">
+            <Sidebar /> 
+          </div>
+
         <div className="container mt-5">
-            <Sidebar />
+          
             <h1 className="mb-4">Manage Users</h1>
+        
             
             {message && <div className={`alert ${message.includes('Error') ? 'alert-danger' : 'alert-info'}`}>{message}</div>}
             
@@ -150,7 +158,10 @@ function Users() {
                 </tbody>
             </table>
         </div>
+        </div>
+</div>
     );
 }
+
 
 export default Users;

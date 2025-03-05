@@ -44,28 +44,68 @@ app.get("/dhomat", (req, res) => {
   });
 });
 
-/*app.get("/orari", (req, res) => {
-  db.query("SELECT * FROM orari", (err, result) => {
-    if (err) {
-      console.error('Error querying database:', err);
-      res.status(500).send("Internal Server Error");
-      return;
-    }
-    res.send(result);
-  });
-});*/
 
-/*app.get("/puntoret", (req, res) => {
-  db.query("SELECT * FROM puntoret", (err, result) => {
-    if (err) {
-      console.error('Error querying database:', err);
-      res.status(500).send("Internal Server Error");
-      return;
-    }
-    res.send(result);
-  });
-});*/
+//login
+app.post('/v1/login', (req, res) => {
+  const { name, email, password, role } = req.body;
 
+ 
+  if (!name || !email || !password || !role) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  const query = 'INSERT INTO login (name, email, password, role) VALUES (?, ?, ?, ?)';
+  db.query(query, [name, email, password, role], (err, result) => {
+    if (err) {
+      console.error('Error during POST request:', err);
+      return res.status(500).send('Error adding user');
+    } else {
+      return res.status(201).json({ message: 'User added successfully' });
+    }
+  });
+});
+
+
+app.put('/v1/login/:id', (req, res) => {
+  const { id } = req.params;
+  const { name, email, password, role } = req.body;
+
+ 
+  if (!name || !email || !password || !role) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  const query = 'UPDATE login SET name = ?, email = ?, password = ?, role = ? WHERE id = ?';
+  db.query(query, [name, email, password, role, id], (err, result) => {
+    if (err) {
+      console.error('Error during PUT request:', err);
+      return res.status(500).send('Error updating user');
+    } else {
+      return res.json({ message: 'User updated successfully' });
+    }
+  });
+});
+
+
+app.delete('/v1/login/:id', (req, res) => {
+  const { id } = req.params;
+  const query = 'DELETE FROM login WHERE id = ?';
+
+  db.query(query, [id], (err, result) => {
+    if (err) {
+      console.error('Error during DELETE request:', err);
+      return res.status(500).send('Error deleting user');
+    } else {
+      return res.json({ message: 'User deleted successfully' });
+    }
+  });
+});
+
+
+
+
+
+//dhomat
 app.get("/standarte", (req, res) => {
   db.query("SELECT * FROM standarte", (err, result) => {
     if (err) {
@@ -136,43 +176,7 @@ app.post("/dhomat", (req, res) => {
   });
 });
 
-/*app.post("/orari", (req, res) => {
-  const sql = "INSERT INTO orari (name, role, h , m , me , e , p) VALUES (?, ?, ? , ? , ? , ? , ?)";
-  const values = [
-    req.body.name,
-    req.body.role,
-    req.body.h,
-    req.body.m,
-    req.body.me,
-    req.body.e,
-    req.body.p
-  ];
-  db.query(sql, values, (err, result) => {
-    if (err) {
-      console.error('Error inserting into database:', err);
-      res.status(500).send("Internal Server Error");
-      return;
-    }
-    res.json(result);
-  });
-});*/
 
-/*app.post("/puntoret", (req, res) => {
-  const sql = "INSERT INTO puntoret (name, sname, role) VALUES (?, ?, ?)";
-  const values = [
-    req.body.name,
-    req.body.sname,
-    req.body.role
-  ];
-  db.query(sql, values, (err, result) => {
-    if (err) {
-      console.error('Error inserting into database:', err);
-      res.status(500).send("Internal Server Error");
-      return;
-    }
-    res.json(result);
-  });
-});*/
 
 app.put("/dhomat/:id", (req, res) => {
   const { id } = req.params;
@@ -189,20 +193,7 @@ app.put("/dhomat/:id", (req, res) => {
   });
 });
 
-/*app.put("/orari/:id", (req, res) => {
-  const { id } = req.params;
-  const { name, role, h , m , me ,e , p  } = req.body;
-  const sql = "UPDATE orari SET name = ?, role = ?, h = ?, m = ? , me = ? , e = ?, p = ? WHERE id = ?";
-  const values = [name, role, h,m,me,e,p ,id];
-  db.query(sql, values, (err, result) => {
-    if (err) {
-      console.error('Error updating database:', err);
-      res.status(500).send("Internal Server Error");
-      return;
-    }
-    res.json(result);
-  });
-});*/
+
 
 app.delete("/dhomat/:id", (req, res) => {
   const { id } = req.params;
@@ -217,96 +208,11 @@ app.delete("/dhomat/:id", (req, res) => {
   });
 });
 
-/*app.delete("/orari/:id", (req, res) => {
-  const { id } = req.params;
-  const sql = "DELETE FROM orari WHERE id = ?";
-  db.query(sql, id, (err, result) => {
-    if (err) {
-      console.error('Error deleting from database:', err);
-      res.status(500).send("Internal Server Error");
-      return;
-    }
-    res.json(result);
-  });
-});*/
-
-/*app.delete("/puntoret/:id", (req, res) => {
-  const { id } = req.params;
-  const sql = "DELETE FROM puntoret WHERE id = ?";
-  db.query(sql, id, (err, result) => {
-    if (err) {
-      console.error('Error deleting from database:', err);
-      res.status(500).send("Internal Server Error");
-      return;
-    }
-    res.json(result);
-  });
-});*/
-/*
-app.post("/users", (req, res) => {
-  const sql = "INSERT INTO users (name, email, password) VALUES (?, ?, ?)";
-  const values = [
-    req.body.name,
-    req.body.email,
-    req.body.password,  
-  ];
-  db.query(sql, values, (err, result) => {
-    if (err) {
-      console.error('Error inserting into database:', err);
-      return res.status(500).send("Internal Server Error");
-    }
-    return res.json(result);
-  });
-});*/
 
 
-/*
-app.get("/users", (req, res) => {
-  db.query("SELECT * FROM users", (err, result) => {
-    if (err) {
-      console.error('Error querying database:', err);
-      res.status(500).send("Internal Server Error");
-      return;
-    }
-    res.send(result);
-  });
-});
 
 
-app.post("/login", (req, res) => {
-  const { email, password, role } = req.body;
-
-  const sql = "SELECT * FROM users WHERE email = ? AND role = ?";
-  
-  db.query(sql, [email, role], (err, result) => {
-    if (err) {
-      console.error('Error querying database:', err);
-      return res.status(500).send("Internal Server Error");
-    }
-
-    if (result.length === 0) {
-      // No user found with that email and role
-      return res.status(400).json({ error: "User not found or role does not match" });
-    }
-
-    const user = result[0];
-
-    // Check if the password matches
-    if (user.password !== password) {
-      return res.status(400).json({ error: "Incorrect password" });
-    }
-
-    // If the role is admin and everything is correct, respond with success
-    if (user.role === 'admin') {
-      res.json({ message: "Admin login successful", user: { id: user.id, name: user.name, email: user.email } });
-    } else {
-      res.status(403).json({ error: "Access denied. Admins only." });
-    }
-  });
-});
-
-*/
-
+//puntoret
 app.get("/puntoret", (req, res) => {
   const q = "SELECT * FROM puntoret"
   db.query(q,(err, data)=>{
@@ -356,6 +262,13 @@ app.put("/puntoret/:id", (req, res)=>{
   })
 })
 
+
+
+
+
+
+
+
 //menu
 app.get("/menu", (req, res) => {
   const q = "SELECT * FROM menu1"
@@ -401,6 +314,18 @@ app.put("/menu/:id", (req, res)=>{
     return res.json("Eshte ndryshuar me sukses")
   })
 })
+ 
+
+//login
+app.get("/v2/login", (req, res) => {
+  db.query("SELECT * FROM login", (err, result) => {
+    if (err) {
+      console.error('Error querying database:', err);
+      return res.status(500).send("Internal Server Error");
+    }
+    res.send(result);
+  });
+});
 
 
 //orari
@@ -458,6 +383,10 @@ app.put("/orari/:id", (req, res)=>{
     return res.json("Eshte ndryshuar me sukses")
   })
 })
+
+
+
+//login
 app.post('/v1/signin', (req, res) => {
   const { email, password } = req.body;
 
@@ -486,7 +415,7 @@ app.post('/v1/signin', (req, res) => {
 
 
 
-
+//register
 app.post('/v1/register', (req, res) => {
   const { name, email, password } = req.body;
 
@@ -515,43 +444,9 @@ app.post('/v1/register', (req, res) => {
 });
 
 
-
-
-
-// Fetch rooms by type
-/*app.get('/:roomType', (req, res) => {
-  const roomType = req.params.roomType;
-  const query = 'SELECT * FROM rooms WHERE type = ?';
-  db.query(query, [roomType], (err, results) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send('Error fetching room data');
-    } else {
-      res.json(results);
-    }
-  });
-});
-
-// Reserve a room
-app.post('/reserve', (req, res) => {
-  console.log("Request body:", req.body);
-  const { tipi } = req.body;
-  const query = 'UPDATE rooms SET reserved = 1 WHERE type = ? AND reserved = 0 LIMIT 1';
-  db.query(query, [tipi], (err, results) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send('Error reserving the room');
-    } else if (results.affectedRows === 0) {
-      res.status(400).send('No available rooms of this type');
-    } else {
-      res.send('Room reserved successfully');
-    }
-  });
-});
-*/
-
+//rezerviet
 app.get('/rooms/:type', (req, res) => {
-  const { type } = req.params;  // Room type from the dropdown
+  const { type } = req.params; 
 
   const query = 'SELECT * FROM reservations WHERE name = ?';
 
@@ -561,7 +456,7 @@ app.get('/rooms/:type', (req, res) => {
       return res.status(500).send('Error fetching rooms');
     }
     
-    res.json(rooms);  // Return the rooms for the selected type
+    res.json(rooms);  
   });
 });
 
@@ -589,12 +484,12 @@ app.post('/reserve', (req, res) => {
       return res.status(404).json({ error: 'Room not found or already reserved' });
     }
 
-    res.json({ message: 'Room reserved successfully!' });//0 AVAILABLE 1 RESERVED
+    res.json({ message: 'Room reserved successfully!' });
   });
 });
 
 
-//admin rezervation side
+
 app.get('/admin/reservations', (req, res) => {
   const query = 'SELECT * FROM reservations';
 
@@ -604,7 +499,7 @@ app.get('/admin/reservations', (req, res) => {
       return res.status(500).json({ error: 'Error fetching reservations' });
     }
 
-    res.json(results); // Send all reservations to the admin
+    res.json(results);
   });
 });
 

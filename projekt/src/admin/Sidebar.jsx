@@ -71,6 +71,14 @@ const Sidebar = () => {
             </Link>
         </div>
 
+        <div className="menu--list">
+            <Link to="/users"  className="item">
+                <BsFillPeopleFill className='icon' />
+               Users
+            </Link>
+        
+        </div>
+
       
     
     

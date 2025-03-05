@@ -1,8 +1,8 @@
 import React from 'react'
 import ContentHeader from '../user/UserContentHeader'
-import Card from '../user/UserCardCard'
+import Card from '../user/UserCard'
 import '../styles/content.css'
-import '../user/UserKlients'
+import Klients from '../user/UserKlients'
 
 
 

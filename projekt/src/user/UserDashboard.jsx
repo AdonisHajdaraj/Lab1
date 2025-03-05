@@ -1,7 +1,6 @@
 import React from 'react'
 import Sidebar from '../user/UserSidebar';
-import Content from '../user/UserCard';
-import Profile from '../user/UserProfileHeader';
+import Content from '../user/UserContent';
 
 
 const UDashboard = () => {
@@ -12,7 +11,7 @@ const UDashboard = () => {
         <div className="dashboard--content">
           <Sidebar />
           <Content />
-          <Profile />
+         
         </div>
      
         
@@ -21,3 +20,5 @@ const UDashboard = () => {
   }
   
   export default UDashboard
+
+  

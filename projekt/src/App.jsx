@@ -15,6 +15,7 @@ import AddFood from './admin/AddFood';
 import EditFood from './admin/EditFood';
 import AddOrari from './admin/AddOrari';
 import UpdatePuntoret from './admin/UpdatePuntoret';
+import Users from './admin/Users';
 
 import Logout from './components/logout';
 import Signup from './components/Signup';
@@ -54,6 +55,7 @@ const App = () => {
           <Route path='/editfood/:id' element={<EditFood/>}/>
           <Route path='/addorari' element={<AddOrari />}/>
           <Route path='/logout' element={<Logout />} />
+          <Route path='/users' element={<Users />} />
 
           <Route path='/user-dashboard' element={<UDashboard />} />
           <Route path='/user-help' element={<UHelp />} />
