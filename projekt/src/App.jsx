@@ -6,7 +6,7 @@ import Dashboard from './admin/Dashboard';
 import Dhomat from './admin/Dhomat';
 import Rezervimet from './admin/Rezervimet';
 import Help from './admin/Help';
-import Rezervo from './admin/Rezervo';
+
 import Orari  from './admin/Orari'
 import Puntoret from './admin/Puntoret';
 import  Menu from './admin/Menu';
@@ -43,7 +43,7 @@ const App = () => {
           <Route path='/dhomat' element={<Dhomat />} />
           <Route path='/rezervimet' element={<Rezervimet />} />
           <Route path='/help' element={<Help />} />
-          <Route path='/rezervo' element={<Rezervo />} />
+
           <Route path='/puntoret' element={<Puntoret />} />
           <Route path='/create' element={<CreatePuntoret />}/>
           <Route path='/update/:id' element={<UpdatePuntoret />}/>

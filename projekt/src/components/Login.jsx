@@ -6,10 +6,17 @@ import axios from 'axios';
 const Login = () => {
   const [values, setValues] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
+  const [serverError, setServerError] = useState('');
   const navigate = useNavigate();
 
-  const handleInputChange = (e) => setValues({ ...values, [e.target.name]: e.target.value });
+  // Funksioni për të ruajtur të dhënat e inputit
+  const handleInputChange = (e) => {
+    setValues({ ...values, [e.target.name]: e.target.value });
+    setErrors({ ...errors, [e.target.name]: '' }); // Hiq mesazhin e gabimit kur përdoruesi shkruan
+    setServerError('');
+  };
 
+  // Validimi i inputeve
   const validate = ({ email, password }) => {
     const errors = {};
     if (!email) errors.email = 'Email is required';
@@ -17,6 +24,7 @@ const Login = () => {
     return errors;
   };
 
+  // Funksioni për të trajtuar login-in
   const handleSubmit = (e) => {
     e.preventDefault();
     const validationErrors = validate(values);
@@ -25,15 +33,22 @@ const Login = () => {
     if (Object.keys(validationErrors).length === 0) {
       axios.post('http://localhost:3008/v1/signin', values)
         .then((res) => {
-          const { token, role } = res.data;
+          const { token, userId, role } = res.data;
+
           if (token) {
             localStorage.setItem('token', token);
+            localStorage.setItem('userId', userId); // ✅ Ruaj ID e përdoruesit
+            localStorage.setItem('userRole', role);
+
             role === 'admin' ? navigate('/dashboard') : navigate('/user-dashboard');
           } else {
-            alert('Authentication failed.');
+            setServerError('Authentication failed. Please check your credentials.');
           }
         })
-        .catch(() => alert('An error occurred. Please try again.'));
+        .catch((err) => {
+          console.error('Login error:', err);
+          setServerError(err.response?.data?.message || 'An error occurred. Please try again.');
+        });
     }
   };
 
@@ -44,6 +59,10 @@ const Login = () => {
           <div className="card shadow-lg border-light">
             <div className="card-body p-5">
               <h2 className="card-title text-center mb-4 text-primary">Sign In</h2>
+
+              {/* Mesazh gabimi nga serveri */}
+              {serverError && <div className="alert alert-danger">{serverError}</div>}
+
               <form onSubmit={handleSubmit}>
                 <div className="form-floating mb-3">
                   <input
@@ -79,6 +98,7 @@ const Login = () => {
                   <Link to="/signup" className="link-primary">Sign up</Link>
                 </div>
               </form>
+
             </div>
           </div>
         </div>

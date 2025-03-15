@@ -2,65 +2,96 @@ const express = require('express');
 const router = express.Router();
 const db = require('./db'); // Ensure to import your database connection
 
-// Merr dhomat sipas llojit
+// Get rooms by type
 router.get('/rooms/:type', (req, res) => {
   const { type } = req.params;
 
-  const query = 'SELECT * FROM reservations WHERE name = ?';
+  const query = 'SELECT * FROM rooms WHERE type = ?';
 
   db.query(query, [type], (err, rooms) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).send('Error fetching rooms');
-    }
-
-    res.json(rooms);  
+      if (err) {
+          console.error(err);
+          return res.status(500).json({ error: 'Gabim gjatë marrjes së dhomave' });
+      }
+      res.json(rooms);
   });
 });
 
-// Rezervo dhome
+// Reserve a room
 router.post('/reserve', (req, res) => {
-  const { roomId, from_date, to_date } = req.body;
+  const { user_id, room_id, from_date, to_date } = req.body;
 
-  if (!roomId || !from_date || !to_date) {
-    return res.status(400).json({ error: 'Missing required fields' });
+  if (!user_id || !room_id || !from_date || !to_date) {
+      return res.status(400).json({ error: 'Të gjitha fushat janë të detyrueshme' });
   }
 
-  const query = `
-    UPDATE reservations
-    SET reservation_status = '1', from_date = ?, to_date = ?
-    WHERE id = ?
-  `;
+  // Check if the room is available
+  const checkQuery = `SELECT reservation_status FROM rooms WHERE id = ?`;
 
-  db.query(query, [from_date, to_date, roomId], (err, result) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ error: 'Database error' });
-    }
+  db.query(checkQuery, [room_id], (err, results) => {
+      if (err) {
+          console.error(err);
+          return res.status(500).json({ error: 'Gabim në verifikimin e dhomës' });
+      }
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'Room not found or already reserved' });
-    }
+      if (results.length === 0) {
+          return res.status(404).json({ error: 'Dhoma nuk u gjet' });
+      }
 
-    res.json({ message: 'Room reserved successfully!' });
+      if (results[0].reservation_status === '1') {
+          return res.status(400).json({ error: 'Dhoma është tashmë e rezervuar' });
+      }
+
+      // Perform the reservation
+      const insertQuery = `
+          INSERT INTO reservations (user_id, room_id, from_date, to_date)
+          VALUES (?, ?, ?, ?)
+      `;
+
+      db.query(insertQuery, [user_id, room_id, from_date, to_date], (err, result) => {
+          if (err) {
+              console.error(err);
+              return res.status(500).json({ error: 'Gabim gjatë rezervimit' });
+          }
+
+          // Update the room's reservation status
+          const updateRoomQuery = `UPDATE rooms SET reservation_status = '1' WHERE id = ?`;
+
+          db.query(updateRoomQuery, [room_id], (err, updateResult) => {
+              if (err) {
+                  console.error(err);
+                  return res.status(500).json({ error: 'Gabim gjatë përditësimit të statusit të dhomës' });
+              }
+
+              res.json({ message: 'Dhoma u rezervua me sukses!' });
+          });
+      });
   });
 });
 
-// Merr te gjitha rezervimet (admin)
+// Get all reservations for admin, including user details
 router.get('/admin/reservations', (req, res) => {
-  const query = 'SELECT * FROM reservations';
+  const query = `
+    SELECT rooms.type AS room_name, rooms.qmimi AS room_price, 
+           reservations.from_date, reservations.to_date
+    FROM reservations
+    JOIN rooms ON reservations.room_id = rooms.id
+  `;
 
   db.query(query, (err, results) => {
     if (err) {
       console.error(err);
-      return res.status(500).json({ error: 'Error fetching reservations' });
+      return res.status(500).json({ error: 'Gabim gjatë marrjes së rezervimeve' });
     }
 
     res.json(results);
   });
 });
 
-// Anulo rezervimin
+
+
+
+// Cancel a reservation
 router.post('/cancel', (req, res) => {
   const { roomId } = req.body;
 
@@ -77,7 +108,7 @@ router.post('/cancel', (req, res) => {
   db.query(sql, [roomId], (err, result) => {
     if (err) {
       console.error(err);
-      return res.status(500).json({ message: 'Failed to cancel the reservation' });
+      return res.status(500).json({ message: 'Gabim gjatë anulimit të rezervimit' });
     }
 
     if (result.affectedRows === 0) {

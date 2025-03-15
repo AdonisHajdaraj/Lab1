@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Table, Button, Alert, Spinner } from 'react-bootstrap';
+import { Table, Alert, Spinner } from 'react-bootstrap';
 import Sidebar from '../admin/Sidebar';
 
 function AdminReservations() {
@@ -15,29 +14,14 @@ function AdminReservations() {
     axios
       .get('http://localhost:3008/admin/reservations')
       .then((res) => {
+        console.log('Rezervimet:', res.data); // Kontrollo të dhënat që merr backend
         setReservations(res.data);
         setLoading(false);
       })
       .catch((err) => {
         setLoading(false);
-        setError('Error fetching reservations');
+        setError('Gabim gjatë marrjes së rezervimeve');
       });
-  };
-
-  // Cancel a reservation
-  const handleCancel = (roomId) => {
-    if (window.confirm('Are you sure you want to cancel this reservation?')) {
-      axios
-        .post('http://localhost:3008/cancel', { roomId })
-        .then((res) => {
-          alert(res.data.message); // Show success message
-          fetchReservations(); // Refresh the reservations list
-        })
-        .catch((err) => {
-          console.error(err);
-          alert('Error canceling the reservation.');
-        });
-    }
   };
 
   useEffect(() => {
@@ -49,59 +33,46 @@ function AdminReservations() {
       <div className="row">
         {/* Sidebar */}
         <div className="col-md-3">
-          <Sidebar /> 
+          <Sidebar />
         </div>
 
-        
         <div className="col-md-9">
           <div className="container mt-5">
             <div className="text-center mb-4">
-              <h1 className="fw-bold text-primary">Menaxhmenti i rezervimeve</h1>
+              <h1 className="fw-bold text-primary">Menaxhimi i rezervimeve</h1>
             </div>
 
             {/* Loading Spinner and Error Alert */}
             {loading && <Spinner animation="border" />}
             {error && <Alert variant="danger">{error}</Alert>}
 
-            
+            {/* Check if there are reservations */}
             {reservations.length > 0 ? (
               <Table striped bordered hover className="mt-4">
                 <thead>
                   <tr>
-                    <th>Emri i dhomes</th>
-                    <th>Numri i dhomes</th>
+                    <th>Emri i dhomës</th>
                     <th>Qmimi</th>
-                    <th>Status</th>
-                    <th>From Date</th>
-                    <th>To Date</th>
-                    <th>Veprimet</th>
+                    <th>Data e fillimit</th>
+                    <th>Data e përfundimit</th>
                   </tr>
                 </thead>
                 <tbody>
                   {reservations.map((reservation) => (
-                    <tr key={reservation.id}>
-                      <td>{reservation.name}</td>
-                      <td>{reservation.nr}</td>
-                      <td>{reservation.qmimi}</td>
-                      <td>{reservation.reservation_status === '0' ? 'Available' : 'Reserved'}</td>
-                      <td>{reservation.from_date || 'N/A'}</td>
-                      <td>{reservation.to_date || 'N/A'}</td>
-                      <td>
-                        {reservation.reservation_status === '1' && (
-                          <Button
-                            variant="danger"
-                            onClick={() => handleCancel(reservation.id)}
-                          >
-                            Cancel
-                          </Button>
-                        )}
-                      </td>
+                    <tr key={reservation.room_id}>
+                      <td>{reservation.room_name}</td> {/* Emri i dhomës */}
+                      <td>{reservation.room_price} €</td> {/* Qmimi */}
+                      <td>{reservation.from_date || 'N/A'}</td> {/* Data e fillimit */}
+                      <td>{reservation.to_date || 'N/A'}</td> {/* Data e përfundimit */}
                     </tr>
                   ))}
                 </tbody>
               </Table>
             ) : (
-              <Alert variant="info">No reservations found.</Alert>
+              // Alert for no reservations
+              reservations.length === 0 && !loading && (
+                <Alert variant="info">Nuk ka asnjë rezervim për shfaqur.</Alert>
+              )
             )}
           </div>
         </div>

@@ -75,7 +75,7 @@ router.post('/v1/signin', (req, res) => {
         return res.status(400).json({ message: "Email and password are required" });
     }
     
-    const sql = "SELECT role FROM login WHERE email = ? AND password = ?";
+    const sql = "SELECT id, role FROM login WHERE email = ? AND password = ?";
     db.query(sql, [email, password], (err, data) => {
         if (err) {
             console.error('Error querying database:', err);
@@ -83,15 +83,17 @@ router.post('/v1/signin', (req, res) => {
         }
         
         if (data.length > 0) {
+            const userId = data[0].id;
             const userRole = data[0].role;
-            const payload = { email, role: userRole };
+            const payload = { id: userId, email, role: userRole };
             const token = jwt.sign(payload, secretKey, { expiresIn: '1h' });
-            return res.json({ token, role: userRole, message: "Success" });
+            return res.json({ token, userId, role: userRole, message: "Success" });
         } else {
             return res.status(401).json({ message: "Invalid email or password" });
         }
     });
 });
+
 
 // Register
 router.post('/v1/register', (req, res) => {
