@@ -62,5 +62,19 @@ router.put("/menu/:id", (req, res) => {
     res.json("Ushqimi është ndryshuar me sukses");
   });
 });
+router.get("/menu/:id", (req, res) => {
+  const ushqimiId = req.params.id;
+  const q = "SELECT * FROM menu1 WHERE id = ?";
 
+  db.query(q, [ushqimiId], (err, result) => {
+    if (err) {
+      console.error("Error fetching food data:", err);
+      return res.status(500).send("Internal Server Error");
+    }
+    if (result.length === 0) {
+      return res.status(404).json({ message: "Food not found" });
+    }
+    res.json(result[0]); // Send the first matching record
+  });
+});
 module.exports = router;

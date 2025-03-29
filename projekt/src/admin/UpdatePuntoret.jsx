@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
@@ -14,6 +14,22 @@ const UpdatePuntoret = () => {
   const location = useLocation();
 
   const puntoriId = location.pathname.split("/")[2];
+
+
+  // Fetch the worker's existing data when the component loads
+  useEffect(() => {
+    const fetchPuntori = async () => {
+      try {
+        const res = await axios.get(`http://localhost:3008/puntoret/${puntoriId}`);
+        setInput(res.data); // Assuming the API returns a single object
+      } catch (err) {
+        console.log("Error fetching worker data:", err);
+        
+      }
+    };
+    fetchPuntori();
+  }, [puntoriId]);
+
 
   const handleChange = (e) => {
     setInput((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -44,7 +60,7 @@ const UpdatePuntoret = () => {
                   placeholder="Shkruaj emrin"
                   name="name"
                   onChange={handleChange}
-                  value={input.name}
+                  value={input.name || ""}
                 />
               </div>
               <div className="mb-3">
@@ -55,7 +71,7 @@ const UpdatePuntoret = () => {
                   placeholder="Shkruaj mbiemrin"
                   name="sname"
                   onChange={handleChange}
-                  value={input.sname}
+                  value={input.sname || ""}
                 />
               </div>
               <div className="mb-3">
@@ -66,7 +82,7 @@ const UpdatePuntoret = () => {
                   placeholder="Shkruaj rolin"
                   name="role"
                   onChange={handleChange}
-                  value={input.role}
+                  value={input.role || ""}
                 />
               </div>
               <div className="d-flex justify-content-center">
@@ -87,3 +103,5 @@ const UpdatePuntoret = () => {
 };
 
 export default UpdatePuntoret;
+
+

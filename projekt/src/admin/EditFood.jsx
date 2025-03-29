@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -11,6 +12,22 @@ const EditFood = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const ushqimiId = location.pathname.split("/")[2];
+
+
+  // Fetch the food's existing data when the component loads
+  useEffect(() => {
+    const fetchUshqimi = async () => {
+      try {
+        const res = await axios.get(`http://localhost:3008/menu/${ushqimiId}`);
+        setInput(res.data); // Assuming the API returns a single object
+      } catch (err) {
+        console.log("Error fetching food data:", err);
+        
+      }
+    };
+    fetchUshqimi();
+  }, [ushqimiId]);
+
 
   const handleChange = (e) => {
     setInput((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -45,6 +62,7 @@ const EditFood = () => {
                     placeholder="Shkruaj emrin e ushqimit"
                     onChange={handleChange}
                     name="name"
+                    value={input.name}
                   />
                 </div>
                 <div className="mb-3">
@@ -56,6 +74,7 @@ const EditFood = () => {
                     placeholder="Shkruaj çmimin e ushqimit"
                     onChange={handleChange}
                     name="price"
+                    value={input.price}
                   />
                 </div>
                 <div className="d-flex justify-content-center">
@@ -73,4 +92,3 @@ const EditFood = () => {
 };
 
 export default EditFood;
-

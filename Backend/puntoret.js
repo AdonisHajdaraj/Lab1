@@ -64,5 +64,19 @@ router.put("/puntoret/:id", (req, res) => {
     res.json("Puntori është ndryshuar me sukses");
   });
 });
+router.get("/puntoret/:id", (req, res) => {
+  const puntoriId = req.params.id;
+  const q = "SELECT * FROM puntoret WHERE id = ?";
 
+  db.query(q, [puntoriId], (err, result) => {
+    if (err) {
+      console.error("Error fetching worker data:", err);
+      return res.status(500).send("Internal Server Error");
+    }
+    if (result.length === 0) {
+      return res.status(404).json({ message: "Worker not found" });
+    }
+    res.json(result[0]); // Send the first matching record
+  });
+}); 
 module.exports = router;
