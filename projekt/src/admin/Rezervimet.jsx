@@ -1,32 +1,55 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Table, Alert, Spinner } from 'react-bootstrap';
+import { Table, Alert, Spinner, Button } from 'react-bootstrap';
 import Sidebar from '../admin/Sidebar';
 
 function AdminReservations() {
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [deleteLoadingId, setDeleteLoadingId] = useState(null);
+  const [deleteError, setDeleteError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
 
-  // Fetch all reservations from the backend
+  // Merr rezervimet nga backend
   const fetchReservations = () => {
     setLoading(true);
+    setError(null);
     axios
       .get('http://localhost:3008/admin/reservations')
       .then((res) => {
-        console.log('Rezervimet:', res.data); // Kontrollo të dhënat që merr backend
         setReservations(res.data);
         setLoading(false);
       })
-      .catch((err) => {
+      .catch(() => {
         setLoading(false);
         setError('Gabim gjatë marrjes së rezervimeve');
       });
   };
 
   useEffect(() => {
-    fetchReservations(); // Load reservations on component mount
+    fetchReservations();
   }, []);
+
+  // Fshij rezervimin dhe përditëso statusin e dhomës
+  const deleteReservation = (reservationId) => {
+    setDeleteLoadingId(reservationId);
+    setDeleteError(null);
+    setSuccessMessage(null);
+
+    axios
+      .delete(`http://localhost:3008/admin/reservations/${reservationId}`)
+      .then((res) => {
+        setSuccessMessage(res.data.message || 'Rezervimi u fshi me sukses dhe dhoma u lirua');
+        fetchReservations(); // rifresko listën e rezervimeve
+      })
+      .catch(() => {
+        setDeleteError('Gabim gjatë fshirjes së rezervimit');
+      })
+      .finally(() => {
+        setDeleteLoadingId(null);
+      });
+  };
 
   return (
     <div className="container-fluid">
@@ -42,11 +65,11 @@ function AdminReservations() {
               <h1 className="fw-bold text-primary">Menaxhimi i rezervimeve</h1>
             </div>
 
-            {/* Loading Spinner and Error Alert */}
             {loading && <Spinner animation="border" />}
             {error && <Alert variant="danger">{error}</Alert>}
+            {deleteError && <Alert variant="danger">{deleteError}</Alert>}
+            {successMessage && <Alert variant="success">{successMessage}</Alert>}
 
-            {/* Check if there are reservations */}
             {reservations.length > 0 ? (
               <Table striped bordered hover className="mt-4">
                 <thead>
@@ -55,22 +78,38 @@ function AdminReservations() {
                     <th>Qmimi</th>
                     <th>Data e fillimit</th>
                     <th>Data e përfundimit</th>
+                    <th>Klienti</th>
+                    <th>Veprime</th> {/* Kolona për butonin Fshi */}
                   </tr>
                 </thead>
                 <tbody>
                   {reservations.map((reservation) => (
-                    <tr key={reservation.room_id}>
-                      <td>{reservation.room_name}</td> {/* Emri i dhomës */}
-                      <td>{reservation.room_price} €</td> {/* Qmimi */}
-                      <td>{reservation.from_date || 'N/A'}</td> {/* Data e fillimit */}
-                      <td>{reservation.to_date || 'N/A'}</td> {/* Data e përfundimit */}
+                    <tr key={reservation.reservation_id}>
+                      <td>{reservation.room_name}</td>
+                      <td>{reservation.room_price} €</td>
+                      <td>{reservation.from_date || 'N/A'}</td>
+                      <td>{reservation.to_date || 'N/A'}</td>
+                      <td>{reservation.client_name || 'N/A'}</td>
+                      <td>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          disabled={deleteLoadingId === reservation.reservation_id}
+                          onClick={() => deleteReservation(reservation.reservation_id)}
+                        >
+                          {deleteLoadingId === reservation.reservation_id ? (
+                            <Spinner animation="border" size="sm" />
+                          ) : (
+                            'Fshi'
+                          )}
+                        </Button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </Table>
             ) : (
-              // Alert for no reservations
-              reservations.length === 0 && !loading && (
+              !loading && (
                 <Alert variant="info">Nuk ka asnjë rezervim për shfaqur.</Alert>
               )
             )}

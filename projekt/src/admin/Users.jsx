@@ -74,12 +74,12 @@ function Users() {
     };
 
     return (
+        <div className="d-flex">
+            <Sidebar />
         <div className="container-fluid">
         <div className="row">
-          {/* Sidebar */}
-          <div className="col-md-3">
-            <Sidebar /> 
-          </div>
+        
+          
 
         <div className="container mt-5">
           
@@ -159,6 +159,7 @@ function Users() {
             </table>
         </div>
         </div>
+</div>
 </div>
     );
 }

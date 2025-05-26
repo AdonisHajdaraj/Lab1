@@ -10,28 +10,28 @@ function UApp() {
   const [showModal, setShowModal] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [reservationDates, setReservationDates] = useState({ from_date: '', to_date: '' });
+  const [selectedType, setSelectedType] = useState(null);
 
-  // Marrim user ID nga localStorage
   const userId = localStorage.getItem("userId");
 
-  // Marr dhomat sipas tipit
   const fetchRooms = (type) => {
     setLoading(true);
     setError('');
+    setSelectedType(type);
     axios
       .get(`http://localhost:3008/rooms/${type}`)
       .then((res) => {
         setRooms(res.data);
         setLoading(false);
       })
-      .catch((err) => {
+      .catch(() => {
         setLoading(false);
         setError('Gabim gjatë marrjes së dhomave. Provoni përsëri.');
       });
   };
 
-  // Hap modalin për rezervim
   const handleReserveClick = (room) => {
+    setError('');
     if (!userId) {
       setError('Nuk ka përdorues të identifikuar. Ju lutem hyni në llogarinë tuaj.');
       return;
@@ -40,8 +40,9 @@ function UApp() {
     setShowModal(true);
   };
 
-  // Funksioni për të trajtuar rezervimin
   const handleReserve = () => {
+    setError('');
+
     if (!reservationDates.from_date || !reservationDates.to_date) {
       setError('Ju lutem zgjedhni të dy datat.');
       return;
@@ -63,9 +64,14 @@ function UApp() {
       .post(`http://localhost:3008/reserve`, reservationData)
       .then(() => {
         setShowModal(false);
-        fetchRooms(selectedRoom.type);
+        setReservationDates({ from_date: '', to_date: '' });
+        setError('');
+
+        if (selectedType) {
+          fetchRooms(selectedType);
+        }
       })
-      .catch((err) => {
+      .catch(() => {
         setError('Gabim gjatë rezervimit të dhomës.');
       });
   };
@@ -73,17 +79,14 @@ function UApp() {
   return (
     <div className="container-fluid">
       <div className="row">
-        {/* Sidebar */}
         <div className="col-md-3">
           <Sidebar />
         </div>
 
-        {/* Main Content */}
         <div className="col-md-9">
           <div className="container mt-5">
-            <h1 className="fw-bold text-center text-primary mb-4">Selekto një dhomë</h1>
+            <h1 className="fw-bold text-center text-primary mb-4">Selekto dhomë</h1>
 
-            {/* Dropdown për zgjedhjen e tipit të dhomës */}
             <div className="text-center">
               <DropdownButton id="dropdown-basic-button" title="Selekto Tipin e Dhomës">
                 {['VIP', 'Standarte', 'Familjare', 'Eksklusive', 'Suite'].map((type) => (
@@ -94,11 +97,9 @@ function UApp() {
               </DropdownButton>
             </div>
 
-            {/* Shfaqim error ose loading spinner */}
             {loading && <div className="text-center mt-3"><Spinner animation="border" /></div>}
             {error && <Alert variant="danger" className="mt-3">{error}</Alert>}
 
-            {/* Tabela e dhomave */}
             {rooms.length > 0 && (
               <Table striped bordered hover className="mt-4 text-center">
                 <thead className="bg-primary text-white">
@@ -131,7 +132,7 @@ function UApp() {
         </div>
       </div>
 
-      {/* Modal për rezervimin e dhomës */}
+      {/* Modal për rezervim */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Rezervo dhomën</Modal.Title>
@@ -155,6 +156,7 @@ function UApp() {
               />
             </Form.Group>
           </Form>
+          {error && <Alert variant="danger">{error}</Alert>}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowModal(false)}>

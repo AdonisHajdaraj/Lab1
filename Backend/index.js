@@ -9,6 +9,8 @@ const puntoret = require('./puntoret');
 const menu = require('./menu');
 const orari = require('./orari');
 const rooms = require('./rooms');
+const help = require('./help');
+
 
 
 
@@ -28,6 +30,9 @@ app.use(puntoret);
 app.use(menu);
 app.use(orari);
 app.use(rooms);
+app.use(help);
+
+
 
 
 

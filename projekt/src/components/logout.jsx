@@ -5,14 +5,25 @@ const Logout = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem('jwtToken'); // kjo ishte problemi
     navigate('/login');
+  };
+
+  const handleCancel = () => {
+    navigate(-1);
   };
 
   return (
     <div className="container mt-5 text-center">
-      <h2>You are about to log out</h2>
-      <button className="btn btn-danger mt-3" onClick={handleLogout}>Logout</button>
+      <h2>Jeni duke dalë nga llogaria</h2>
+      <div className="mt-3">
+        <button className="btn btn-danger me-3" onClick={handleLogout}>
+          Logout
+        </button>
+        <button className="btn btn-secondary" onClick={handleCancel}>
+          Anulo
+        </button>
+      </div>
     </div>
   );
 };
