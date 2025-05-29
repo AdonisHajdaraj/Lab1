@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import Sidebar from '../admin/Sidebar'; // Adjust the import path if necessary
+import Sidebar from '../admin/Sidebar';
 
 const Menu = () => {
     const [ushqimet, setUshqimet] = useState([]);
@@ -10,6 +10,7 @@ const Menu = () => {
         const fetchAllUshqimet = async () => {
             try {
                 const res = await axios.get('http://localhost:3008/menu');
+                console.log(res.data);
                 setUshqimet(res.data);
             } catch (err) {
                 console.log(err);
@@ -30,18 +31,16 @@ const Menu = () => {
     return (
         <div className="container-fluid">
             <div className="row">
-                {/* Sidebar */}
                 <div className="col-md-3">
                     <Sidebar />
                 </div>
-
-                {/* Main Content */}
                 <div className="col-md-9">
                     <div className="container mt-5">
                         <h2 className="text-center mb-4 text-primary">Menuja e Ushqimit</h2>
                         <table className="table table-hover table-striped table-bordered shadow">
                             <thead className="bg-primary text-white">
                                 <tr>
+                                    <th>Foto</th>
                                     <th>Emri i Ushqimit</th>
                                     <th>Çmimi</th>
                                     <th>Veprimet</th>
@@ -50,6 +49,19 @@ const Menu = () => {
                             <tbody>
                                 {ushqimet.map((ushqimi) => (
                                     <tr key={ushqimi.id}>
+                                        <td className="align-middle">
+                                            {ushqimi.image ? (
+                                                <img
+                                                    src={`http://localhost:3008${ushqimi.image?.replace(/\\/g, "/")}`}
+                                                    alt={ushqimi.name}
+                                                    style={{ width: "60px", height: "60px", objectFit: "cover", borderRadius: "5px" }}
+                                                    />
+
+                                            ) : (
+                                                <span className="text-danger">Nuk ka foto</span>
+                                            )}
+                                        </td>
+
                                         <td className="align-middle">{ushqimi.name}</td>
                                         <td className="align-middle">{ushqimi.price} €</td>
                                         <td className="align-middle">
@@ -60,7 +72,10 @@ const Menu = () => {
                                                 >
                                                     <i className="bi bi-trash"></i> Fshij
                                                 </button>
-                                                <Link to={`/editfood/${ushqimi.id}`} className="btn btn-warning btn-sm text-white">
+                                                <Link
+                                                    to={`/editfood/${ushqimi.id}`}
+                                                    className="btn btn-warning btn-sm text-white"
+                                                >
                                                     <i className="bi bi-pencil-square"></i> Edit
                                                 </Link>
                                             </div>

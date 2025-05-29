@@ -7,6 +7,7 @@ const AddFood = () => {
     name: "",
     price: "",
   });
+  const [file, setFile] = useState(null);
 
   const navigate = useNavigate();
 
@@ -14,17 +15,27 @@ const AddFood = () => {
     setInput((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
+
   const handleClick = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:3008/menu", input);
+      const formData = new FormData();
+      formData.append('name', input.name);
+      formData.append('price', input.price);
+      if (file) formData.append('image', file);
+
+      await axios.post("http://localhost:3008/menu", formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
       navigate("/menu");
     } catch (err) {
       console.log(err);
     }
   };
-
-  console.log(input);
 
   return (
     <div className="container mt-5">
@@ -56,6 +67,16 @@ const AddFood = () => {
                     placeholder="Shkruaj çmimin e ushqimit"
                     onChange={handleChange}
                     name="price"
+                  />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="image" className="form-label">Foto Ushqimi</label>
+                  <input
+                    type="file"
+                    className="form-control"
+                    id="image"
+                    onChange={handleFileChange}
+                    accept="image/*"
                   />
                 </div>
                 <div className="d-flex justify-content-center">

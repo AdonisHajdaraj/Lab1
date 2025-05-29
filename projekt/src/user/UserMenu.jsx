@@ -32,6 +32,7 @@ const UserMenu = () => {
                         <table className="table table-hover table-striped table-bordered shadow">
                             <thead className="bg-primary text-white">
                                 <tr>
+                                    <th>Foto</th>
                                     <th>Emri i Ushqimit</th>
                                     <th>Çmimi</th>
                                 </tr>
@@ -39,11 +40,28 @@ const UserMenu = () => {
                             <tbody>
                                 {ushqimet.map((ushqimi) => (
                                     <tr key={ushqimi.id}>
+                                        <td className="align-middle">
+                                            {ushqimi.image ? (
+                                                <img
+                                                    src={`http://localhost:3008${ushqimi.image.replace(/\\/g, "/")}`}
+                                                    alt={ushqimi.name}
+                                                    style={{
+                                                        width: "60px",
+                                                        height: "60px",
+                                                        objectFit: "cover",
+                                                        borderRadius: "5px",
+                                                    }}
+                                                />
+                                            ) : (
+                                                <span className="text-danger">Nuk ka foto</span>
+                                            )}
+                                        </td>
                                         <td className="align-middle">{ushqimi.name}</td>
                                         <td className="align-middle">{ushqimi.price} €</td>
                                     </tr>
                                 ))}
                             </tbody>
+
                         </table>
                     </div>
                 </div>

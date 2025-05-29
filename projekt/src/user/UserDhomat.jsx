@@ -32,7 +32,15 @@ const UDhomat = () => {
                                 <div key={index} className="col-12 col-md-6 col-lg-4">
                                     <div className="card">
                                         <h5 className="card-title">{dhoma.name}</h5>
-                                        {dhoma.image && <img src={dhoma.image} alt="room" />}
+                                        {dhoma.image && (
+                                         <img
+                                            src={dhoma.image}
+                                            alt="room"
+                                            className="card-img-top"
+                                            style={{ height: '200px', objectFit: 'cover' }}
+                                        />
+                                        )}
+
                                         <div className="card-body">
                                             <p>{dhoma.pershkrimi}</p>
                                         </div>
