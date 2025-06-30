@@ -16,7 +16,7 @@ function Help() {
   };
 
   const handleDelete = (id) => {
-    if (window.confirm("A jeni i sigurt që doni ta fshini këtë pyetje?")) {
+    if (window.confirm("A jeni i sigurt që doni ta fshini këtë feedback?")) {
       axios.delete(`http://localhost:3008/questions/${id}`)
         .then(() => {
           setQuestions(prev => prev.filter(q => q.id !== id));
@@ -28,31 +28,41 @@ function Help() {
   return (
     <div className="container-fluid">
       <div className="row">
-        <div className="col-md-3"><Sidebar /></div>
+        {/* Sidebar */}
+        <div className="col-md-3">
+          <Sidebar />
+        </div>
+
+        {/* Main content */}
         <div className="col-md-9 mt-5">
-          <h2 className="text-center mb-4">Pyetjet e përdoruesve</h2>
+          <h2 className="text-center mb-4">Feedback nga Përdoruesit</h2>
 
-          {Array.isArray(questions) && questions.map(q => (
-            <div key={q.id} className="card mb-3 shadow-sm">
-              <div className="card-body">
-                <h5 className="card-title">{q.email || 'Email jo i disponueshëm'}</h5>
-                <p className="card-text"><strong>Pyetje:</strong> {q.question}</p>
+          {Array.isArray(questions) && questions.length > 0 ? (
+            questions.map((q) => (
+              <div key={q.id} className="card mb-4 shadow-sm border-primary">
+                <div className="card-body">
+                  <h6 className="card-subtitle mb-2 text-muted">{q.email || 'Email i panjohur'}</h6>
+                  <p className="card-text"><strong>Feedback:</strong> {q.question}</p>
 
-                {q.answer && (
-                  <div className="alert alert-success">
-                    <strong>Përgjigje:</strong> {q.answer}
-                  </div>
-                )}
+                  {q.answer && (
+                    <div className="alert alert-info mt-3" role="alert" style={{ whiteSpace: 'pre-wrap' }}>
+                      <strong>Përgjigje e dhënë:</strong> <br />
+                      {q.answer}
+                    </div>
+                  )}
 
-                <button
-                  className="btn btn-danger mt-2"
-                  onClick={() => handleDelete(q.id)}
-                >
-                  Fshij
-                </button>
+                  <button
+                    className="btn btn-outline-danger mt-3"
+                    onClick={() => handleDelete(q.id)}
+                  >
+                    Fshij Feedback
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p className="text-center fst-italic text-secondary">Nuk ka feedback për t'u shfaqur.</p>
+          )}
         </div>
       </div>
     </div>

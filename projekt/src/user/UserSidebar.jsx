@@ -39,10 +39,13 @@ const USidebar = () => {
             </Link>
         
         </div>
-
+          <div className="menu--list">
+            <Link to="/r"  className="item">
+                <BsFillPeopleFill className='icon' />
+          Rezervimet e mia
+            </Link>
         
-       
-
+        </div>
 
  
         

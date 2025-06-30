@@ -25,24 +25,10 @@ import UDhomat from './user/UserDhomat';
 import UHelp from './user/UserHelp';
 import UApp from './user/UserRezervo';
 import UMenu from './user/UserMenu';
+import MyReservations from './user/MyReservations';
+import PrivateRoute from './components/PrivateRoute';
 
-// 🔐 Komponent për mbrojtjen e rrugeve me kontroll roli
-const PrivateRoute = ({ children, allowedRoles }) => {
-  const token = localStorage.getItem('token'); // tokeni që ruan në login
-  const role = localStorage.getItem('userRole'); // roli i përdoruesit
 
-  if (!token) {
-    // Nëse nuk ka token ridrejto në login
-    return <Navigate to="/login" />;
-  }
-
-  if (allowedRoles && !allowedRoles.includes(role)) {
-    // Nëse roli nuk është në allowedRoles ridrejto në login
-    return <Navigate to="/login" />;
-  }
-
-  return children;
-};
 
 const App = () => {
   return (
@@ -54,18 +40,12 @@ const App = () => {
       <Route path='/logout' element={<Logout />} />
 
       {/* Admin Protected Routes */}
-      <Route
-        path='/dashboard'
-        element={
-          <PrivateRoute allowedRoles={['admin']}>
-            <Dashboard />
-          </PrivateRoute>
-        }
-      />
+       <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+  
       <Route
         path='/dhomat'
         element={
-          <PrivateRoute allowedRoles={['admin']}>
+          <PrivateRoute >
             <Dhomat />
           </PrivateRoute>
         }
@@ -73,7 +53,7 @@ const App = () => {
       <Route
         path='/rezervimet'
         element={
-          <PrivateRoute allowedRoles={['admin']}>
+          <PrivateRoute >
             <Rezervimet />
           </PrivateRoute>
         }
@@ -81,7 +61,7 @@ const App = () => {
       <Route
         path='/help'
         element={
-          <PrivateRoute allowedRoles={['admin']}>
+          <PrivateRoute >
             <Help />
           </PrivateRoute>
         }
@@ -89,7 +69,7 @@ const App = () => {
       <Route
         path='/puntoret'
         element={
-          <PrivateRoute allowedRoles={['admin']}>
+          <PrivateRoute>
             <Puntoret />
           </PrivateRoute>
         }
@@ -97,7 +77,7 @@ const App = () => {
       <Route
         path='/create'
         element={
-          <PrivateRoute allowedRoles={['admin']}>
+          <PrivateRoute >
             <CreatePuntoret />
           </PrivateRoute>
         }
@@ -105,7 +85,7 @@ const App = () => {
       <Route
         path='/update/:id'
         element={
-          <PrivateRoute allowedRoles={['admin']}>
+          <PrivateRoute >
             <UpdatePuntoret />
           </PrivateRoute>
         }
@@ -113,7 +93,7 @@ const App = () => {
       <Route
         path='/menu'
         element={
-          <PrivateRoute allowedRoles={['admin']}>
+          <PrivateRoute >
             <Menu />
           </PrivateRoute>
         }
@@ -121,7 +101,7 @@ const App = () => {
       <Route
         path='/orari'
         element={
-          <PrivateRoute allowedRoles={['admin']}>
+          <PrivateRoute >
             <Orari />
           </PrivateRoute>
         }
@@ -129,7 +109,7 @@ const App = () => {
       <Route
         path='/addfood'
         element={
-          <PrivateRoute allowedRoles={['admin']}>
+          <PrivateRoute>
             <AddFood />
           </PrivateRoute>
         }
@@ -137,7 +117,7 @@ const App = () => {
       <Route
         path='/editfood/:id'
         element={
-          <PrivateRoute allowedRoles={['admin']}>
+          <PrivateRoute >
             <EditFood />
           </PrivateRoute>
         }
@@ -145,7 +125,7 @@ const App = () => {
       <Route
         path='/addorari'
         element={
-          <PrivateRoute allowedRoles={['admin']}>
+          <PrivateRoute>
             <AddOrari />
           </PrivateRoute>
         }
@@ -153,7 +133,7 @@ const App = () => {
       <Route
         path='/users'
         element={
-          <PrivateRoute allowedRoles={['admin']}>
+          <PrivateRoute>
             <Users />
           </PrivateRoute>
         }
@@ -163,7 +143,7 @@ const App = () => {
       <Route
         path='/user-dashboard'
         element={
-          <PrivateRoute allowedRoles={['user']}>
+          <PrivateRoute >
             <UDashboard />
           </PrivateRoute>
         }
@@ -171,7 +151,7 @@ const App = () => {
       <Route
         path='/user-help'
         element={
-          <PrivateRoute allowedRoles={['user']}>
+          <PrivateRoute >
             <UHelp />
           </PrivateRoute>
         }
@@ -179,7 +159,7 @@ const App = () => {
       <Route
         path='/user-rezervo'
         element={
-          <PrivateRoute allowedRoles={['user']}>
+          <PrivateRoute >
             <UApp />
           </PrivateRoute>
         }
@@ -187,7 +167,7 @@ const App = () => {
       <Route
         path='/user-dhomat'
         element={
-          <PrivateRoute allowedRoles={['user']}>
+          <PrivateRoute >
             <UDhomat />
           </PrivateRoute>
         }
@@ -195,11 +175,20 @@ const App = () => {
       <Route
         path='/user-menu'
         element={
-          <PrivateRoute allowedRoles={['user']}>
+          <PrivateRoute>
             <UMenu />
           </PrivateRoute>
         }
       />
+  <Route
+  path='/r'
+  element={
+    <PrivateRoute >
+      <MyReservations />
+    </PrivateRoute>
+  }
+/>
+
     </Routes>
   );
 };

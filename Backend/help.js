@@ -46,5 +46,18 @@ router.delete('/questions/:id', (req, res) => {
   });
 });
 
+router.get('/count', (req, res) => {
+  const query = 'SELECT COUNT(*) AS count FROM user_questions';
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Gabim në marrjen e numrit të feedback:', err);
+      return res.status(500).json({ error: 'Gabim serveri' });
+    }
+
+    res.json({ count: results[0].count });
+  });
+});
+
 
 module.exports = router;

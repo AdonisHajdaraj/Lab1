@@ -197,6 +197,81 @@ router.delete('/admin/reservations/:id', (req, res) => {
     });
   });
 });
+router.get('/reservations/count', (req, res) => {
+  const query = 'SELECT COUNT(*) AS count FROM reservations';
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Gabim në marrjen e numrit të porosive:', err);
+      return res.status(500).json({ error: 'Gabim serveri' });
+    }
+
+    res.json({ count: results[0].count });
+  });
+});
+router.get('/user/reservations/:userId', (req, res) => {
+  const userId = req.params.userId;
+
+  const query = `
+    SELECT r.id, r.room_id, rm.nr, rm.type, rm.qmimi
+    FROM reservations r
+    JOIN rooms rm ON r.room_id = rm.id
+    WHERE r.user_id = ?`;
+
+  db.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error('Gabim gjatë marrjes së rezervimeve:', err);
+      return res.status(500).json({ message: 'Gabim gjatë marrjes së rezervimeve.' });
+    }
+
+    res.json(results);
+  });
+});
+
+
+
+
+router.delete('/reservations/:id', (req, res) => {
+  const reservationId = req.params.id;
+
+  const checkQuery = 'SELECT room_id FROM reservations WHERE id = ?';
+  db.query(checkQuery, [reservationId], (err, results) => {
+    if (err) {
+      console.error('Gabim gjatë kontrollimit të rezervimit:', err);
+      return res.status(500).json({ message: 'Gabim gjatë fshirjes së rezervimit.' });
+    }
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'Rezervimi nuk u gjet.' });
+    }
+
+    const roomId = results[0].room_id;
+
+    const deleteQuery = 'DELETE FROM reservations WHERE id = ?';
+    db.query(deleteQuery, [reservationId], (err, deleteResult) => {
+      if (err) {
+        console.error('Gabim gjatë fshirjes së rezervimit:', err);
+        return res.status(500).json({ message: 'Gabim gjatë fshirjes së rezervimit.' });
+      }
+      if (deleteResult.affectedRows === 0) {
+        return res.status(404).json({ message: 'Rezervimi nuk u gjet për fshirje.' });
+      }
+
+      const updateRoomQuery = "UPDATE rooms SET reservation_status = '0' WHERE id = ?";
+      db.query(updateRoomQuery, [roomId], (err, updateResult) => {
+        if (err) {
+          console.error('Gabim gjatë përditësimit të statusit të dhomës:', err);
+          return res.status(500).json({ message: 'Gabim gjatë përditësimit të statusit të dhomës.' });
+        }
+
+        console.log('Rezultati i përditësimit të dhomës:', updateResult);
+        res.json({ message: 'Rezervimi u fshi me sukses dhe dhoma u lirua' });
+      });
+    });
+  });
+});
+
+
+
 
 
 module.exports = router;
